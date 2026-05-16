@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  whatsapp-bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/app/data        # Persists WA session, analytics, registry
+    ports:
+      - "8080:8080"             # Webhook API
+    shm_size: '256mb'           # Required for Chromium/Puppeteer

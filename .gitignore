@@ -1,0 +1,6 @@
+node_modules/
+.env
+data/.wwebjs_auth/
+data/analytics.jsonl
+data/chat_registry.json
+*.log
