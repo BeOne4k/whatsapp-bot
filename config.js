@@ -40,4 +40,9 @@ module.exports = {
     // ── BotsAPI ──────────────────────────────────────────────────
     BOTS_API_URL: process.env.BOTS_API_URL || 'http://localhost:8000',
     BOTS_API_KEY: process.env.BOTS_API_KEY || '',
+
+    // ── Twilio (SMS OTP) ─────────────────────────────────────────
+    TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || '',
+    TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || '',
+    TWILIO_FROM: process.env.TWILIO_FROM || '',             // e.g. +12345678901
 };

@@ -1,6 +1,7 @@
 /**
  * utils/otp.js — OTP generation and verification.
  * Mirrors utils/otp.py exactly.
+ * Twilio credentials are read from config.js (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM).
  */
 
 const log = (...args) => console.log('[OTP]', ...args);
@@ -52,15 +53,31 @@ function verifyOtp(phone, entered) {
 }
 
 /**
- * Send OTP via SMS.
- * TODO: Replace with real SMS provider (Twilio, AWS SNS, etc.)
+ * Send OTP via SMS using Twilio.
+ * Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM in .env.
+ * If not configured, falls back to a stub (logs to console only).
  */
 async function sendOtpSms(phone, otp) {
-    log(`[SMS] Sending OTP ${otp} to ${phone}`);
-    // Example with Twilio:
-    // const twilio = require('twilio')(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
-    // await twilio.messages.create({ to: phone, from: process.env.TWILIO_FROM, body: `Your OTP: ${otp}` });
-    return true;
+    const config = require('../config');
+
+    if (!config.TWILIO_ACCOUNT_SID || !config.TWILIO_AUTH_TOKEN || !config.TWILIO_FROM) {
+        log(`[stub] OTP ${otp} → ${phone} (Twilio not configured, set TWILIO_* in .env)`);
+        return true;
+    }
+
+    try {
+        const twilio = require('twilio')(config.TWILIO_ACCOUNT_SID, config.TWILIO_AUTH_TOKEN);
+        await twilio.messages.create({
+            to: phone,
+            from: config.TWILIO_FROM,
+            body: `Your verification code: ${otp}`,
+        });
+        log(`Sent OTP to ${phone} via Twilio`);
+        return true;
+    } catch (e) {
+        log(`Twilio error for ${phone}:`, e.message);
+        return false;
+    }
 }
 
 module.exports = { generateOtp, verifyOtp, sendOtpSms };

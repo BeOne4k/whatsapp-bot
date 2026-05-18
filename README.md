@@ -107,6 +107,9 @@ GET /health
 | `GA4_API_SECRET` | GA4 API secret | No |
 | `BOTS_API_URL` | BotsAPI multi-channel server URL | No |
 | `BOTS_API_KEY` | BotsAPI key | No |
+| `TWILIO_ACCOUNT_SID` | Twilio Account SID (for SMS OTP) | Yes |
+| `TWILIO_AUTH_TOKEN` | Twilio Auth Token | Yes |
+| `TWILIO_FROM` | Twilio phone number (e.g. +12345678901) | Yes |
 
 ## File Structure
 
