@@ -103,8 +103,8 @@ GET /health
 | `RECIPE_URL` | Recipe partner URL | No |
 | `THANK_YOU_DELAY_SECONDS` | Delay for thank-you message (default 600) | No |
 | `RETENTION_DELAY_SECONDS` | Delay for retention message (default 86400) | No |
-| `GA4_MEASUREMENT_ID` | Google Analytics 4 ID | No |
-| `GA4_API_SECRET` | GA4 API secret | No |
+| `META_PIXEL_ID` | Facebook Pixel ID (Meta Ads Manager) | No |
+| `META_ACCESS_TOKEN` | Meta Conversions API access token | No |
 | `BOTS_API_URL` | BotsAPI multi-channel server URL | No |
 | `BOTS_API_KEY` | BotsAPI key | No |
 | `TWILIO_ACCOUNT_SID` | Twilio Account SID (for SMS OTP) | Yes |

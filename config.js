@@ -33,9 +33,9 @@ module.exports = {
     THANK_YOU_DELAY_SECONDS: parseInt(process.env.THANK_YOU_DELAY_SECONDS || '600', 10),
     RETENTION_DELAY_SECONDS: parseInt(process.env.RETENTION_DELAY_SECONDS || '86400', 10),
 
-    // ── Analytics ────────────────────────────────────────────────
-    GA4_MEASUREMENT_ID: process.env.GA4_MEASUREMENT_ID || '',
-    GA4_API_SECRET: process.env.GA4_API_SECRET || '',
+    // ── Meta Conversions API (Ads Manager) ───────────────────────
+    META_PIXEL_ID: process.env.META_PIXEL_ID || '',          // Facebook Pixel ID
+    META_ACCESS_TOKEN: process.env.META_ACCESS_TOKEN || '',  // Meta CAPI access token
 
     // ── BotsAPI ──────────────────────────────────────────────────
     BOTS_API_URL: process.env.BOTS_API_URL || 'http://localhost:8000',

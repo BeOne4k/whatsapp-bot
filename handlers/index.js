@@ -5,8 +5,9 @@
  * lists; users reply with a digit. FSM states handle multi-step flows.
  */
 
-const { getState, getLang, setState, clearState, States } = require('../utils/state');
+const { getState, getLang, clearState, States } = require('../utils/state');
 const { t } = require('../locales/texts');
+
 const startHandler = require('./start');
 const loyaltyHandler = require('./loyalty');
 const storesHandler = require('./stores');
@@ -15,114 +16,207 @@ const helpHandler = require('./help');
 const aboutHandler = require('./about');
 const socialsHandler = require('./socials');
 
-const REGIONS = ['Bangkok', 'Phuket', 'Chiang Mai', 'Pattaya', 'Moscow', 'Saint Petersburg'];
-
 function setupHandlers(client) {
+
+    // ONLY incoming messages
     client.on('message', async (msg) => {
-        // Only handle private text messages and location shares
-        const chat = await msg.getChat();
-        if (chat.isGroup) return;
-
-        const chatId = msg.from; // e.g. "66812345678@c.us"
-        const text = (msg.body || '').trim();
-        const state = getState(chatId);
-        const lang = getLang(chatId);
-
         try {
-            // ── /start or "start" ───────────────────────────────────────────
+            const chat = await msg.getChat();
+
+            // Ignore groups
+            if (chat.isGroup) return;
+
+            const cleanChatId = msg.key?.remoteJid || msg.from;
+            const cleancleanChatId = cleanChatId.replace(':11@lid', '@lid');
+            const state = getState(cleancleanChatId);
+            const lang = getLang(cleancleanChatId);
+            const text = (msg.body || msg.message?.conversation || '').trim();
+
+            console.log('[Incoming]', {
+                from: msg.from,
+                to: msg.to,
+                fromMe: msg.fromMe,
+                body: msg.body
+            });
+
+
+            // ── /start or "start" ─────────────────────────────────────
             if (/^\/start/i.test(text) || text.toLowerCase() === 'start') {
-                await startHandler.handleStart(client, msg, chatId);
+                await startHandler.handleStart(client, msg, cleancleanChatId);
                 return;
             }
 
-            // ── /menu or "menu" ─────────────────────────────────────────────
+            // ── /menu or "menu" ──────────────────────────────────────
             if (/^\/menu/i.test(text) || text.toLowerCase() === 'menu') {
-                clearState(chatId);
-                await startHandler.showMainMenu(client, chatId, lang);
+                clearState(cleancleanChatId);
+                await startHandler.showMainMenu(client, cleancleanChatId, lang);
                 return;
             }
 
-            // ── Language selection (only when no active state) ───────────────
+            // ── No active state ──────────────────────────────────────
             if (!state) {
-                if (text === '1' || /english/i.test(text)) { await startHandler.setLanguage(client, chatId, 'en'); return; }
-                if (text === '2' || /русский|russian/i.test(text)) { await startHandler.setLanguage(client, chatId, 'ru'); return; }
-                if (text === '3' || /ไทย|thai/i.test(text)) { await startHandler.setLanguage(client, chatId, 'th'); return; }
 
-                // Main menu choices (after language is set)
-                const menuMap = { '1': 'stores', '2': 'loyalty', '3': 'help', '4': 'manager', '5': 'about', '6': 'socials', '7': 'lang' };
-                if (menuMap[text]) {
-                    switch (menuMap[text]) {
-                        case 'stores': await storesHandler.startStores(client, chatId, lang); break;
-                        case 'loyalty': await loyaltyHandler.startLoyalty(client, msg, chatId, lang); break;
-                        case 'help': await helpHandler.startHelp(client, chatId, lang); break;
-                        case 'manager': await managerHandler.startManager(client, chatId, lang); break;
-                        case 'about': await aboutHandler.handleAbout(client, chatId, lang); break;
-                        case 'socials': await socialsHandler.handleSocials(client, chatId, lang); break;
-                        case 'lang': await startHandler.showLanguageMenu(client, chatId); break;
-                    }
+                // Language selection
+                if (text === '1' || /english/i.test(text)) {
+                    await startHandler.setLanguage(client, cleancleanChatId, 'en');
                     return;
                 }
 
-                // Default: show main menu
-                await startHandler.showMainMenu(client, chatId, lang);
+                if (text === '2' || /русский|russian/i.test(text)) {
+                    await startHandler.setLanguage(client, cleancleanChatId, 'ru');
+                    return;
+                }
+
+                if (text === '3' || /ไทย|thai/i.test(text)) {
+                    await startHandler.setLanguage(client, cleancleanChatId, 'th');
+                    return;
+                }
+
+                // Main menu
+                switch (text) {
+
+                    case '1':
+                        await storesHandler.startStores(client, cleancleanChatId, lang);
+                        return;
+
+                    case '2':
+                        console.log('[MENU] Loyalty selected');
+                        await loyaltyHandler.startLoyalty(client, msg, cleancleanChatId, lang);
+                        return;
+
+                    case '3':
+                        await helpHandler.startHelp(client, cleancleanChatId, lang);
+                        return;
+
+                    case '4':
+                        await managerHandler.startManager(client, cleancleanChatId, lang);
+                        return;
+
+                    case '5':
+                        await aboutHandler.handleAbout(client, cleancleanChatId, lang);
+                        return;
+
+                    case '6':
+                        await socialsHandler.handleSocials(client, cleancleanChatId, lang);
+                        return;
+
+                    case '7':
+                        await startHandler.showLanguageMenu(client, cleancleanChatId);
+                        return;
+                }
+
+                // Default menu
+                await startHandler.showMainMenu(client, cleancleanChatId, lang);
                 return;
             }
 
-            // ── Active FSM states ────────────────────────────────────────────
+            // ── Loyalty FSM ──────────────────────────────────────────
 
-            // Loyalty flow
-            if (state === States.LOYALTY_PHONE) { await loyaltyHandler.processPhone(client, msg, chatId, lang); return; }
-            if (state === States.LOYALTY_OTP) { await loyaltyHandler.processOtp(client, msg, chatId, lang); return; }
-            if (state === States.LOYALTY_NAME) { await loyaltyHandler.processName(client, msg, chatId, lang); return; }
-            if (state === States.LOYALTY_COUNTRY) { await loyaltyHandler.processCountry(client, msg, chatId, lang); return; }
-            if (state === States.LOYALTY_TOURIST) { await loyaltyHandler.processTourist(client, msg, chatId, lang); return; }
-            if (state === States.LOYALTY_THAI_CITIZEN) { await loyaltyHandler.processThaiCitizen(client, msg, chatId, lang); return; }
+            if (state === States.LOYALTY_PHONE) {
+                await loyaltyHandler.processPhone(client, msg, cleancleanChatId, lang);
+                return;
+            }
 
-            // Store flow
+            if (state === States.LOYALTY_OTP) {
+                await loyaltyHandler.processOtp(client, msg, cleancleanChatId, lang);
+                return;
+            }
+
+            if (state === States.LOYALTY_NAME) {
+                await loyaltyHandler.processName(client, msg, cleancleanChatId, lang);
+                return;
+            }
+
+            if (state === States.LOYALTY_COUNTRY) {
+                await loyaltyHandler.processCountry(client, msg, cleancleanChatId, lang);
+                return;
+            }
+
+            if (state === States.LOYALTY_TOURIST) {
+                await loyaltyHandler.processTourist(client, msg, cleancleanChatId, lang);
+                return;
+            }
+
+            if (state === States.LOYALTY_THAI_CITIZEN) {
+                await loyaltyHandler.processThaiCitizen(client, msg, cleancleanChatId, lang);
+                return;
+            }
+
+            // ── Store FSM ────────────────────────────────────────────
+
             if (state === States.STORE_WAITING_GEO) {
+
                 if (msg.type === 'location' || msg.location) {
-                    await storesHandler.handleLocation(client, msg, chatId, lang);
+                    await storesHandler.handleLocation(client, msg, cleancleanChatId, lang);
                 } else {
-                    // Try region name
-                    await storesHandler.handleRegionText(client, msg, chatId, lang);
+                    await storesHandler.handleRegionText(client, msg, cleancleanChatId, lang);
                 }
+
                 return;
             }
+
             if (state === States.STORE_CHOOSING_REGION) {
-                await storesHandler.handleRegionText(client, msg, chatId, lang);
+                await storesHandler.handleRegionText(client, msg, cleancleanChatId, lang);
                 return;
             }
 
-            // Manager chat
+            // ── Manager FSM ──────────────────────────────────────────
+
             if (state === States.MANAGER_CHATTING) {
+
                 const lower = text.toLowerCase();
-                const transferWords = ['human', 'manager', 'agent', 'человека', 'менеджера', 'живой', 'คน'];
+
+                const transferWords = [
+                    'human',
+                    'manager',
+                    'agent',
+                    'человека',
+                    'менеджера',
+                    'живой',
+                    'คน'
+                ];
+
                 if (transferWords.some((w) => lower.includes(w))) {
-                    await managerHandler.transferToManager(client, msg, chatId, lang);
+                    await managerHandler.transferToManager(client, msg, cleancleanChatId, lang);
                 } else {
-                    await managerHandler.handleUserMessage(client, msg, chatId, lang);
+                    await managerHandler.handleUserMessage(client, msg, cleancleanChatId, lang);
                 }
+
                 return;
             }
 
-            // Help chat
+            // ── Help FSM ─────────────────────────────────────────────
+
             if (state === States.HELP_CHATTING) {
+
                 if (text === '0' || /clear|очистить|ล้าง/i.test(text)) {
-                    await helpHandler.clearHistory(client, chatId, lang);
-                } else if (text === '9' || /menu|меню|เมนู/i.test(text)) {
-                    clearState(chatId);
-                    await startHandler.showMainMenu(client, chatId, lang);
-                } else {
-                    await helpHandler.handleMessage(client, msg, chatId, lang);
+                    await helpHandler.clearHistory(client, cleancleanChatId, lang);
+                    return;
                 }
+
+                if (text === '9' || /menu|меню|เมนู/i.test(text)) {
+                    clearState(cleancleanChatId);
+                    await startHandler.showMainMenu(client, cleancleanChatId, lang);
+                    return;
+                }
+
+                await helpHandler.handleMessage(client, msg, cleancleanChatId, lang);
                 return;
             }
 
         } catch (err) {
+
             console.error('[Handler] Error:', err);
+
             try {
-                await client.sendMessage(chatId, t(getLang(chatId), 'error_generic'));
-            } catch { /* ignore */ }
+                const fallbackLang = getLang(msg.from);
+                await client.sendMessage(
+                    msg.from,
+                    t(fallbackLang, 'error_generic')
+                );
+            } catch {
+                // ignore
+            }
         }
     });
 

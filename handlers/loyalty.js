@@ -24,6 +24,8 @@ function isYes(text) { return YES_WORDS.has(text.toLowerCase().trim()); }
 function isNo(text) { return NO_WORDS.has(text.toLowerCase().trim()); }
 
 async function startLoyalty(client, msg, chatId, lang) {
+    console.log('[LOYALTY] ENTERED');
+    await client.sendMessage(chatId, 'DEBUG: loyalty started');
     await track(chatId, 'loyalty_started', lang);
     setState(chatId, States.LOYALTY_PHONE);
     cancelReminder(chatId, 'loyalty5m');

@@ -110,6 +110,23 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', bot_ready: !!_client });
 });
 
+// ── Meta Webhook Verification (GET) ─────────────────────────────────────────
+// Meta calls this when you click "Подтвердить и сохранить" in Developer Console.
+// WEBHOOK_SECRET must match what you typed in "Подтверждение маркера".
+app.get("/", (req, res) => {
+    const mode      = req.query["hub.mode"];
+    const token     = req.query["hub.verify_token"];
+    const challenge = req.query["hub.challenge"];
+
+    if (mode === "subscribe" && token === config.WEBHOOK_SECRET) {
+        console.log("[Webhook] Meta verification passed");
+        res.status(200).send(challenge);
+    } else {
+        console.warn("[Webhook] Meta verification FAILED — check WEBHOOK_SECRET");
+        res.sendStatus(403);
+    }
+});
+
 // ── Start server ──────────────────────────────────────────────────────────────
 
 function startWebhookServer(client) {
