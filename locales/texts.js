@@ -67,10 +67,10 @@ const TEXTS = {
         stores_request_geo:
             '📍 *Find nearest store*\n\n' +
             'Please share your location (send as attachment) or type a region name:\n' +
-            'Available regions: Bangkok, Phuket, Chiang Mai, Pattaya, Moscow, Saint Petersburg',
+            'Available regions: Bangkok, Phuket, Samui, Pattaya',
         btn_send_geo: '📍 Share location',
         btn_choose_region: '🗺 Choose region',
-        stores_choose_region: 'Please type a region name:\nBangkok, Phuket, Chiang Mai, Pattaya, Moscow, Saint Petersburg',
+        stores_choose_region: 'Please type a region name:\nBangkok, Phuket, Samui, Pattaya',
         stores_not_found: '😔 No stores found nearby. Try a different region.',
         stores_result: '📍 *Nearest stores ({count} found):*',
         btn_open_maps: '🗺 Open in Google Maps',
@@ -174,10 +174,10 @@ const TEXTS = {
         stores_request_geo:
             '📍 *Поиск ближайшего магазина*\n\n' +
             'Поделитесь геолокацией или введите название региона:\n' +
-            'Доступные регионы: Bangkok, Phuket, Chiang Mai, Pattaya, Moscow, Saint Petersburg',
+            'Доступные регионы: Bangkok, Phuket, Samui, Pattaya',
         btn_send_geo: '📍 Отправить геолокацию',
         btn_choose_region: '🗺 Выбрать регион',
-        stores_choose_region: 'Введите название региона:\nBangkok, Phuket, Chiang Mai, Pattaya, Moscow, Saint Petersburg',
+        stores_choose_region: 'Введите название региона:\nBangkok, Phuket, Samui, Pattaya',
         stores_not_found: '😔 Рядом не найдено магазинов. Попробуйте другой регион.',
         stores_result: '📍 *Ближайшие магазины (найдено: {count}):*',
         btn_open_maps: '🗺 Открыть в Google Maps',
@@ -281,10 +281,10 @@ const TEXTS = {
         stores_request_geo:
             '📍 *ค้นหาร้านใกล้เคียง*\n\n' +
             'แชร์ตำแหน่งหรือพิมพ์ชื่อภูมิภาค:\n' +
-            'ภูมิภาคที่มี: Bangkok, Phuket, Chiang Mai, Pattaya, Moscow, Saint Petersburg',
+            'ภูมิภาคที่มี: Bangkok, Phuket, Samui, Pattaya',
         btn_send_geo: '📍 แชร์ตำแหน่ง',
         btn_choose_region: '🗺 เลือกภูมิภาค',
-        stores_choose_region: 'พิมพ์ชื่อภูมิภาค:\nBangkok, Phuket, Chiang Mai, Pattaya, Moscow, Saint Petersburg',
+        stores_choose_region: 'พิมพ์ชื่อภูมิภาค:\nBangkok, Phuket, Samui, Pattaya',
         stores_not_found: '😔 ไม่พบร้านค้าใกล้เคียง ลองเลือกภูมิภาคอื่น',
         stores_result: '📍 *ร้านค้าใกล้เคียง (พบ {count} แห่ง):*',
         btn_open_maps: '🗺 เปิดใน Google Maps',

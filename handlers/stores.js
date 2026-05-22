@@ -9,7 +9,7 @@ const { track } = require('../utils/analytics');
 const { findStoresByLocation, findStoresByRegion } = require('../utils/stores');
 const { showMainMenu } = require('./start');
 
-const REGIONS = ['Bangkok', 'Phuket', 'Chiang Mai', 'Pattaya', 'Moscow', 'Saint Petersburg'];
+const REGIONS = ['Bangkok', 'Phuket', 'Samui', 'Pattaya'];
 
 async function startStores(client, chatId, lang) {
     setState(chatId, States.STORE_WAITING_GEO);
@@ -27,7 +27,7 @@ async function handleLocation(client, msg, chatId, lang) {
     await track(chatId, 'store_search_geo', lang, { lat, lon });
     const found = findStoresByLocation(lat, lon);
     clearState(chatId);
-    await _sendStoreResults(client, chatId, found, lang);
+    await _sendStoreResults(client, chatId, found, lang, true);
 }
 
 async function handleRegionText(client, msg, chatId, lang) {
@@ -50,24 +50,33 @@ async function handleRegionText(client, msg, chatId, lang) {
     await track(chatId, 'store_search_region', lang, { region });
     const found = findStoresByRegion(region);
     clearState(chatId);
-    await _sendStoreResults(client, chatId, found, lang);
+    await _sendStoreResults(client, chatId, found, lang, false);
 }
 
-async function _sendStoreResults(client, chatId, stores, lang) {
+async function _sendStoreResults(client, chatId, stores, lang, withDistance) {
     if (!stores.length) {
         await client.sendMessage(chatId, t(lang, 'stores_not_found'));
         await showMainMenu(client, chatId, lang);
         return;
     }
 
-    await client.sendMessage(chatId, t(lang, 'stores_result', { count: stores.length }));
-
     for (const store of stores) {
-        let card = t(lang, 'store_card', { name: store.name, address: store.address, hours: store.hours });
-        if (store.distance_km !== undefined) card += `\n📏 ${store.distance_km} km`;
-        const mapsUrl = `https://www.google.com/maps?q=${store.lat},${store.lon}`;
-        card += `\n\n${t(lang, 'show_card_hint')}`;
+        const hours = store.hours;
+        const mapsUrl = store.google_maps_url || `https://www.google.com/maps?q=${store.lat},${store.lon}`;
+
+        let card;
+        if (hours) {
+            card = `🏪 *${store.name}*\n📍 ${store.address}\n🕐 ${hours}`;
+        } else {
+            card = `🏪 *${store.name}*\n📍 ${store.address}`;
+        }
+
+        if (withDistance && store.distance_km !== undefined) {
+            card += `\n📏 ${store.distance_km} km`;
+        }
+
         card += `\n\n🗺 ${t(lang, 'btn_open_maps')}: ${mapsUrl}`;
+
         await client.sendMessage(chatId, card);
     }
 
