@@ -1,19 +1,53 @@
 /**
- * utils/state.js — In-memory FSM state store (replaces aiogram FSM + MemoryStorage).
+ * utils/state.js — In-memory FSM state store with persistent lang storage.
  *
- * State structure per chatId:
- *   { state: <string|null>, data: <object>, lang: <string> }
+ * FSM state (what step the user is on) is intentionally in-memory only —
+ * after a restart the user simply types anything and gets the main menu back.
+ *
+ * Language preference IS persisted to disk so users don't have to re-select
+ * their language every time the bot restarts.
  */
 
-const store = new Map(); // chatId -> { state, data, lang }
+const fs   = require('fs');
+const path = require('path');
 
+// ── Persistent lang store ─────────────────────────────────────────────────────
+const LANG_FILE    = path.join(__dirname, '../data/user_langs.json');
 const DEFAULT_LANG = 'en';
 
-function _get(chatId) {
-    if (!store.has(chatId)) {
-        store.set(chatId, { state: null, data: {}, lang: DEFAULT_LANG });
+let _langs = {}; // chatId → lang
+
+function _loadLangs() {
+    try {
+        fs.mkdirSync(path.dirname(LANG_FILE), { recursive: true });
+        if (fs.existsSync(LANG_FILE)) {
+            _langs = JSON.parse(fs.readFileSync(LANG_FILE, 'utf-8'));
+        }
+    } catch (e) {
+        console.error('[State] lang load error:', e.message);
+        _langs = {};
     }
-    return store.get(chatId);
+}
+
+function _saveLangs() {
+    try {
+        fs.mkdirSync(path.dirname(LANG_FILE), { recursive: true });
+        fs.writeFileSync(LANG_FILE, JSON.stringify(_langs, null, 2), 'utf-8');
+    } catch (e) {
+        console.error('[State] lang save error:', e.message);
+    }
+}
+
+_loadLangs();
+
+// ── In-memory FSM store ───────────────────────────────────────────────────────
+const _store = new Map(); // chatId → { state: string|null, data: object }
+
+function _get(chatId) {
+    if (!_store.has(chatId)) {
+        _store.set(chatId, { state: null, data: {} });
+    }
+    return _store.get(chatId);
 }
 
 function getState(chatId) {
@@ -27,7 +61,7 @@ function setState(chatId, state) {
 function clearState(chatId) {
     const s = _get(chatId);
     s.state = null;
-    s.data = {};
+    s.data  = {};
 }
 
 function getData(chatId) {
@@ -39,11 +73,20 @@ function updateData(chatId, patch) {
 }
 
 function getLang(chatId) {
-    return _get(chatId).lang || DEFAULT_LANG;
+    return _langs[chatId] || DEFAULT_LANG;
 }
 
 function setLang(chatId, lang) {
-    _get(chatId).lang = lang;
+    _langs[chatId] = lang;
+    _saveLangs();
+}
+
+/**
+ * Returns true if this chatId has ever selected a language
+ * (i.e. the user has been through /start before).
+ */
+function hasLang(chatId) {
+    return !!_langs[chatId];
 }
 
 // FSM state constants (mirrors states.py)
@@ -52,15 +95,15 @@ const States = {
     LANG_CHOOSING: 'lang:choosing',
 
     // Loyalty
-    LOYALTY_PHONE: 'loyalty:phone',
-    LOYALTY_OTP: 'loyalty:otp',
-    LOYALTY_NAME: 'loyalty:name',
-    LOYALTY_COUNTRY: 'loyalty:country',
-    LOYALTY_TOURIST: 'loyalty:tourist',
+    LOYALTY_PHONE:        'loyalty:phone',
+    LOYALTY_OTP:          'loyalty:otp',
+    LOYALTY_NAME:         'loyalty:name',
+    LOYALTY_COUNTRY:      'loyalty:country',
+    LOYALTY_TOURIST:      'loyalty:tourist',
     LOYALTY_THAI_CITIZEN: 'loyalty:thai_citizen',
 
     // Store
-    STORE_WAITING_GEO: 'store:waiting_geo',
+    STORE_WAITING_GEO:    'store:waiting_geo',
     STORE_CHOOSING_REGION: 'store:choosing_region',
 
     // Manager
@@ -70,4 +113,9 @@ const States = {
     HELP_CHATTING: 'help:chatting',
 };
 
-module.exports = { getState, setState, clearState, getData, updateData, getLang, setLang, States };
+module.exports = {
+    getState, setState, clearState,
+    getData, updateData,
+    getLang, setLang, hasLang,
+    States,
+};

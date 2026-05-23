@@ -1,23 +1,14 @@
-/**
- * bot.js — WhatsApp Bot (WDN) entry point
- * Uses whatsapp-web.js (puppeteer-based) as the WhatsApp client.
- */
-
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const express = require('express');
 
-const config = require('./config');
 const { setupHandlers } = require('./handlers');
 const { startWebhookServer } = require('./webhook_api');
 
-// ── Logging ──────────────────────────────────────────────────────────────────
 const log = (level, ...args) => {
     const ts = new Date().toISOString();
     console[level === 'error' ? 'error' : 'log'](`[${ts}] [${level.toUpperCase()}]`, ...args);
 };
 
-// ── WhatsApp Client ───────────────────────────────────────────────────────────
 const client = new Client({
     authStrategy: new LocalAuth({ dataPath: './data/.wwebjs_auth' }),
     puppeteer: {
@@ -34,42 +25,48 @@ const client = new Client({
     },
 });
 
-// ── QR code for linking ───────────────────────────────────────────────────────
 client.on('qr', (qr) => {
-    log('info', 'QR code received. Scan it with WhatsApp:');
+    log('info', 'Scan QR code:');
     qrcode.generate(qr, { small: true });
 });
 
-client.on('authenticated', () => {
-    log('info', 'WhatsApp client authenticated');
-});
+client.on('authenticated', () => log('info', 'Authenticated'));
 
 client.on('ready', () => {
-    log('info', 'WhatsApp bot is ready!');
+    log('info', 'Bot is ready!');
     setupHandlers(client);
+
+    // Debug: dump all events the client emits
+    const emit = client.pupPage?.on?.bind(client.pupPage);
+    log('info', 'Puppage available:', !!client.pupPage);
 });
 
 client.on('auth_failure', (msg) => {
-    log('error', 'Authentication failure:', msg);
+    log('error', 'Auth failure:', msg);
     process.exit(1);
 });
 
 client.on('disconnected', (reason) => {
-    log('warn', 'Client disconnected:', reason);
+    log('warn', 'Disconnected:', reason);
     process.exit(1);
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
+// Try both events
+client.on('message', (msg) => {
+    log('debug', '[message] from:', msg.from, 'body:', msg.body?.slice(0, 50));
+});
+
+client.on('message_create', (msg) => {
+    log('debug', '[message_create] fromMe:', msg.fromMe, 'from:', msg.from, 'body:', msg.body?.slice(0, 50));
+});
+
 async function main() {
-    log('info', 'Starting WhatsApp bot...');
-
-    // Start FastAPI-equivalent webhook server (Express)
+    log('info', 'Starting...');
     startWebhookServer(client);
-
     await client.initialize();
 }
 
 main().catch((err) => {
-    log('error', 'Fatal error:', err);
+    log('error', 'Fatal:', err);
     process.exit(1);
 });
