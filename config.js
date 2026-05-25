@@ -12,6 +12,7 @@ module.exports = {
 
     // ── Manager notifications ────────────────────────────────────
     MANAGER_PHONE: process.env.MANAGER_PHONE || '',     // WhatsApp number with country code, e.g. 66812345678
+    MANAGER_WA_ID: process.env.MANAGER_WA_ID || '',     // WhatsApp ID shown to users, e.g. +66812345678
     MANAGER_WORK_START: parseInt(process.env.MANAGER_WORK_START || '10', 10),
     MANAGER_WORK_END: parseInt(process.env.MANAGER_WORK_END || '18', 10),
 

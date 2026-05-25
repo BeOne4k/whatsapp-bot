@@ -101,15 +101,17 @@ const TEXTS = {
 
         error_generic: '⚠️ Something went wrong. Please try again.',
 
-        menu_hint:
+                menu_hint:
             'Reply with a number to choose:\n' +
             '1️⃣ ' + '📍 Find nearest store' + '\n' +
             '2️⃣ ' + '🎁 Get loyalty card' + '\n' +
             '3️⃣ ' + '🤖 Help (AI Assistant)' + '\n' +
-            '4️⃣ ' + '💬 Contact manager' + '\n' +
-            '5️⃣ ' + 'ℹ️ About us' + '\n' +
-            '6️⃣ ' + '📲 Our socials' + '\n' +
-            '7️⃣ ' + '🌐 Change language',
+            '4️⃣ ' + 'ℹ️ About us' + '\n' +
+            '5️⃣ ' + '📲 Our socials' + '\n' +
+            '6️⃣ ' + '🌐 Change language',
+
+        help_hint: '0 = clear history · 9 = main menu · M = contact manager',
+        manager_username_prompt: '👤 You can contact our manager directly on WhatsApp: {wa_id}',
     },
 
     ru: {
@@ -208,15 +210,17 @@ const TEXTS = {
 
         error_generic: '⚠️ Что-то пошло не так. Попробуйте ещё раз.',
 
-        menu_hint:
+                menu_hint:
             'Ответьте цифрой для выбора:\n' +
             '1️⃣ 📍 Найти ближайший магазин\n' +
             '2️⃣ 🎁 Получить карту лояльности\n' +
             '3️⃣ 🤖 Помощь (ИИ-ассистент)\n' +
-            '4️⃣ 💬 Связаться с менеджером\n' +
-            '5️⃣ ℹ️ О компании\n' +
-            '6️⃣ 📲 Наши соцсети\n' +
-            '7️⃣ 🌐 Сменить язык',
+            '4️⃣ ℹ️ О компании\n' +
+            '5️⃣ 📲 Наши соцсети\n' +
+            '6️⃣ 🌐 Сменить язык',
+
+        help_hint: '0 = очистить · 9 = главное меню · M = связаться с менеджером',
+        manager_username_prompt: '👤 Вы можете написать нашему менеджеру напрямую в WhatsApp: {wa_id}',
     },
 
     th: {
@@ -310,15 +314,17 @@ const TEXTS = {
 
         error_generic: '⚠️ เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',
 
-        menu_hint:
+                menu_hint:
             'ตอบด้วยตัวเลขเพื่อเลือก:\n' +
             '1️⃣ 📍 ค้นหาร้านใกล้เคียง\n' +
             '2️⃣ 🎁 รับบัตรสะสมแต้ม\n' +
             '3️⃣ 🤖 ช่วยเหลือ (AI Assistant)\n' +
-            '4️⃣ 💬 ติดต่อผู้จัดการ\n' +
-            '5️⃣ ℹ️ เกี่ยวกับเรา\n' +
-            '6️⃣ 📲 โซเชียลมีเดียของเรา\n' +
-            '7️⃣ 🌐 เปลี่ยนภาษา',
+            '4️⃣ ℹ️ เกี่ยวกับเรา\n' +
+            '5️⃣ 📲 โซเชียลมีเดียของเรา\n' +
+            '6️⃣ 🌐 เปลี่ยนภาษา',
+
+        help_hint: '0 = ล้างประวัติ · 9 = เมนูหลัก · M = ติดต่อผู้จัดการ',
+        manager_username_prompt: '👤 คุณสามารถติดต่อผู้จัดการของเราโดยตรงใน WhatsApp: {wa_id}',
     },
 };
 
