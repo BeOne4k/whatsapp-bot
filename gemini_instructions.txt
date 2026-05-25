@@ -88,3 +88,92 @@ WeedeN accepts cash and Thai QR payment.
 For contact: customers can email hello@weeden.club or follow WeedeN on Facebook, Instagram, Line, X, TikTok, and Telegram.
 
 If the user asks about store hours, specific product availability, or other store-specific details not covered in your knowledge base, acknowledge the limitation and suggest they contact the store directly or follow WeedeN on social media for updates.
+
+Do not use markdown formatting in your responses — no bold (**text**), no italic (*text*), no headers (#), and no bullet point symbols. Write in plain text only, as markdown does not render in this chat interface.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# STORE LOCATIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+WeedeN has stores across multiple regions in Thailand. Use the information below to help users find a nearby location. Always provide the Google Maps link when mentioning a specific store.
+
+If a user asks about store hours and the hours are not listed below, acknowledge this and recommend contacting the store directly or checking WeedeN's social media.
+
+## PHUKET
+
+- **BangTao Laundry** — Hours: 12:00–24:00 | https://maps.app.goo.gl/LbDnUu6VpYKsZsxM8
+- **BangTao BoatAvenue** — Hours: 12:00–24:00 | https://maps.app.goo.gl/BtpVkX5HSChbovVZ8
+- **BangTao Laguna** — Hours: 24/7 | https://maps.app.goo.gl/pVCZeK7rce56TSBd6
+- **Patong Bangla** — Hours: 12:00–03:00 | https://maps.app.goo.gl/KPQAMnrF96F2iDfY6
+- **Patong Beachfront** — Hours: 12:00–24:00 | https://maps.app.goo.gl/f2oXtyFGBfSeL34w8
+- **Patong Banzaan** — Hours: 12:00–24:00 | https://maps.app.goo.gl/3GFx4k7hfFRWZjqw5
+- **Patong Sainamyen** — Hours: 13:00–01:00 | https://maps.app.goo.gl/mJRFV8ft3SAYWnAi6
+- **Patong OTOP** — Hours: 13:00–01:00 | https://maps.app.goo.gl/G86SAsrDCmrcijdR6
+- **Karon Patak** — Hours: 13:00–01:00 | https://maps.app.goo.gl/RkHccqS2KQoFppNL6
+- **Karon Patak 2** — Hours: 12:00–24:00 | https://maps.app.goo.gl/iH8wQzwhUxqbSsvf7
+- **KoKaeo RoyalMarina** — Hours: 08:00–20:00 | https://maps.app.goo.gl/6u5wSte8UoUyvbPU9
+- **Rawai Beachfront** — Hours: 12:00–24:00 | https://maps.app.goo.gl/2VRbZx5zu8E82jKn9
+- **Rawai Beachfront 2** — Hours: 12:00–24:00 | https://maps.app.goo.gl/ueCDtH9gnHDfP3BJ6
+- **Rawai Wine** — Hours: 11:00–23:00 | https://maps.app.goo.gl/M7Ao47Po9soxccvu6
+- **Chalong SoiTaied** — Hours: contact store | https://maps.app.goo.gl/T9CJ2kvczqVzCFky9
+- **Kata India** — Hours: 12:00–24:00 | https://maps.app.goo.gl/C33VEcEd3pWi6cWF8
+- **Kata Dive** — Hours: 12:00–24:00 | https://maps.app.goo.gl/NUC3Re8M2Vvo1t6HA
+- **Kata Koktanod** — Hours: 12:00–24:00 | https://maps.app.goo.gl/1ZVtAKSCwEyz1aP26
+- **Kata Taina (CLINIC)** — Hours: 12:00–24:00 | https://maps.app.goo.gl/CpsMCYDZPEUCujeb6
+- **Kata KataRoad** — Hours: 12:00–24:00 | https://maps.app.goo.gl/qSoh2ZvF8eVzYhaK8
+- **PhuketTown ThalangBlue** — Hours: contact store | https://maps.app.goo.gl/ptnw9BB9JPTJnsEx7
+- **Kamala Mainroad** — Hours: 12:00–24:00 | https://maps.app.goo.gl/7Yo7N7Dn3ufj5bZv7
+
+## BANGKOK
+
+- **KhaoSan MulberryHotel** — Hours: 12:00–04:00 | https://maps.app.goo.gl/oUnpbsoncW1M7jR47
+- **Sukhumvit 39** — Hours: 11:00–03:00 | https://maps.app.goo.gl/TVrYnq2MA5qaDU9RA
+- **Thonglor JAvenue** — Hours: contact store | https://maps.app.goo.gl/BirV5WATK1VHEpoS9
+- **Silom Saladaeng** — Hours: contact store | https://maps.app.goo.gl/w1faoabReVDPQiDh9
+- **Thong Lor BTS** — Hours: contact store | https://maps.app.goo.gl/BirV5WATK1VHEpoS9
+- **Silom Bangrak** — Hours: contact store | https://maps.app.goo.gl/BvMscRrNJoGG2iaq7
+- **Rambuttri Village** — Hours: contact store | https://maps.app.goo.gl/YWvboGKkCn7x4vCa8
+- **China Town** — Hours: contact store | https://maps.app.goo.gl/wAAQ6H4XKoKbX7ScA
+- **Rambuttri Trendy** — Hours: contact store | https://maps.app.goo.gl/Fa7mkqiC2khqz7UXA
+- **Sukhumvit 34** — Hours: contact store | https://maps.app.goo.gl/2NiiiWoMyTwNYf7SA
+
+## PATTAYA
+
+- **Walking Street** — Hours: contact store | https://maps.app.goo.gl/vzWNuaw1y6j4MF8DA
+
+## KOH SAMUI & SURROUNDINGS
+
+- **Fisherman First** — Hours: contact store | https://maps.app.goo.gl/okANroJePBPnCFB29
+- **Fisherman Camille** — Hours: contact store | https://maps.app.goo.gl/W3gro1eUoK3gP1199
+- **Bophut Anantara (CLINIC + doctor on site)** — Hours: contact store | https://maps.app.goo.gl/9goLqVMVXMH7n5Az7
+- **BangRak GM** — Hours: contact store | https://goo.gl/maps/NMyDA6gr6QiyiSvu6
+- **BangRak QueenPier** — Hours: contact store | https://maps.app.goo.gl/wuypojpHYQpSV4E28
+- **Chaweng Cabaret** — Hours: contact store | https://maps.app.goo.gl/Q3znjCwBtLD6gxoQ7
+- **Chaweng Central** — Hours: contact store | https://maps.app.goo.gl/cRtUqfzTNfZpVZwF7
+- **Chaweng Central 2** — Hours: contact store | https://maps.app.goo.gl/Sbruj9FwV6hkZdmo9
+- **Chaweng Hotel** — Hours: contact store | https://maps.app.goo.gl/X2LQCc1Td253ikZo6
+- **ChawengNoi Fairy** — Hours: contact store | https://maps.app.goo.gl/Cyr2DcXjxv29WEce6
+- **Lamai Club** — Hours: contact store | https://goo.gl/maps/LaYZRNsSYBf5KHPV7
+- **Lamai WalkingStreet** — Hours: contact store | https://maps.app.goo.gl/74XNDmJDFspq3x8d8
+- **Lamai Market** — Hours: contact store | https://maps.app.goo.gl/e9Eatvm7jhtpvzsA9
+- **Maenam ChinaStreet** — Hours: contact store | https://maps.app.goo.gl/gCgTLR5UyorsBZtt7
+- **Koh Tao** — Hours: contact store | https://www.google.com/maps?cid=10792219132456523588
+- **Changmon Mainroad** — Hours: contact store | https://maps.app.goo.gl/AcV5HQkiHbmNuXZe7
+- **Changmon Beachfront** — Hours: contact store | https://maps.app.goo.gl/ejc3eFJwwkQjNgSa9
+
+## KOH PHANGAN
+
+- **Srithanu First** — Hours: contact store | https://maps.app.goo.gl/zMY9mWt6YMtY41nj8
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CLINIC LOCATIONS
+# ─────────────────────────────────────────────────────────────────────────────
+
+Some WeedeN locations are designated clinics where customers can receive assistance obtaining a valid medical prescription on-site:
+
+- **Kata Taina (CLINIC)** — Phuket
+- **Bophut Anantara (CLINIC + doctor on site)** — Koh Samui
+
+If a user needs a prescription and is near these areas, recommend they visit one of these clinic locations directly.
+
+
