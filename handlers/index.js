@@ -134,6 +134,10 @@ function setupHandlers(client) {
                     await startHandler.showMainMenu(client, chatId, lang);
                     return;
                 }
+                if (text === 'm' || text === 'м' || /manager|менеджер|ผู้จัดการ/i.test(text)) {
+                    await helpHandler.contactManager(client, chatId, lang);
+                    return;
+                }
                 await helpHandler.handleMessage(client, msg, chatId, lang);
                 return;
             }
@@ -149,10 +153,9 @@ function setupHandlers(client) {
                 case '1': await storesHandler.startStores(client, chatId, lang);         return;
                 case '2': await loyaltyHandler.startLoyalty(client, msg, chatId, lang);  return;
                 case '3': await helpHandler.startHelp(client, chatId, lang);             return;
-                case '4': await managerHandler.startManager(client, chatId, lang);        return;
-                case '5': await aboutHandler.handleAbout(client, chatId, lang);          return;
-                case '6': await socialsHandler.handleSocials(client, chatId, lang);      return;
-                case '7': await startHandler.showLanguageMenu(client, chatId);           return;
+                case '4': await aboutHandler.handleAbout(client, chatId, lang);          return;
+                case '5': await socialsHandler.handleSocials(client, chatId, lang);      return;
+                case '6': await startHandler.showLanguageMenu(client, chatId);           return;
             }
 
             // Fallback
