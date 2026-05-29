@@ -12,7 +12,7 @@ module.exports = {
 
     // ── Manager notifications ────────────────────────────────────
     MANAGER_PHONE: process.env.MANAGER_PHONE || '',     // WhatsApp number with country code, e.g. 66812345678
-    MANAGER_WA_ID: process.env.MANAGER_WA_ID || '',     // WhatsApp ID shown to users, e.g. +66812345678
+    MANAGER_WA_ID: '+' + process.env.MANAGER_PHONE || '',     // WhatsApp ID shown to users, e.g. +66812345678
     MANAGER_WORK_START: parseInt(process.env.MANAGER_WORK_START || '10', 10),
     MANAGER_WORK_END: parseInt(process.env.MANAGER_WORK_END || '18', 10),
 
@@ -45,5 +45,6 @@ module.exports = {
     // ── Twilio (SMS OTP) ─────────────────────────────────────────
     TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || '',
     TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || '',
-    TWILIO_FROM: process.env.TWILIO_FROM || '',             // e.g. +12345678901
+    TWILIO_FROM: process.env.TWILIO_FROM || '', 
+    TWILIO_MESSAGING_SERVICE_SID: process.env.TWILIO_MESSAGING_SERVICE_SID            // e.g. +12345678901
 };

@@ -51,8 +51,7 @@ function findStoresByLocation(lat, lon, radiusKm = SEARCH_RADIUS_KM) {
 function findStoresByRegion(region) {
     const stores = _loadStores();
     return stores
-        .filter((s) => s.region && s.region.toLowerCase().includes(region.toLowerCase()))
-        .slice(0, 5);
+        .filter((s) => s.region && s.region.toLowerCase().includes(region.toLowerCase()));
 }
 
 function getAllRegions() {

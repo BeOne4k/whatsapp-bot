@@ -15,7 +15,7 @@ const { showMainMenu } = require('./start');
 
 const PHONE_REGEX = /^\+?[1-9]\d{7,14}$/;
 
-// Вспомогательные сеты для ответов Да/Нет и навигации по новому меню
+// Вспомогательные сеты для ответов Да/Нет
 const YES_WORDS = new Set(['yes', 'да', 'ใช่', 'y', '1', '✅', 'yep', 'yeah', 'sure']);
 const NO_WORDS = new Set(['no', 'нет', 'ไม่ใช่', 'n', '2', '❌', 'nope', 'nah']);
 
@@ -23,79 +23,16 @@ function isYes(text) { return YES_WORDS.has(text.toLowerCase().trim()); }
 function isNo(text) { return NO_WORDS.has(text.toLowerCase().trim()); }
 
 /**
- * Точка входа во флоу лояльности
+ * Точка входа во флоу лояльности — сразу запускает регистрацию
  */
 async function startLoyalty(client, msg, chatId, lang) {
     console.log('[LOYALTY] ENTERED');
     await track(chatId, 'loyalty_started', lang);
     cancelReminder(chatId, 'loyalty5m');
 
-    // TODO: Реализуйте проверку наличия телефона/карты у пользователя по chatId (WhatsApp ID)
-    // Например, запрос в вашу локальную БД или кэш стейтов.
-    const userPhone = null; // getPhoneByChatId(chatId)
-
-    if (userPhone) {
-        // КАРТА УЖЕ ЕСТЬ
-        setState(chatId, States.LOYALTY_HAS_CARD);
-        
-        // Отправляем сообщение: "Вот твоя карта 🎁 ... Номер карты: XXXXXXXXXX"
-        // Текст должен содержать в себе подсказку о кнопках/командах (например, "Отправьте 1, чтобы узнать как использовать")
-        await client.sendMessage(chatId, t(lang, 'loyalty_already_have_card_text'));
-        
-        // Если нужно сразу прикрепить штрихкод из базы данных:
-        // const barcodeUrl = getBarcodeByPhone(userPhone);
-        // if (barcodeUrl) await client.sendMessage(chatId, `🏷 Barcode: ${barcodeUrl}`);
-    } else {
-        // КАРТЫ ЕЩЕ НЕТ
-        setState(chatId, States.LOYALTY_NO_CARD);
-        
-        // Отправляем стартовое сообщение "🎁 Моя карта лояльности" с описанием опций
-        await client.sendMessage(chatId, t(lang, 'loyalty_start_no_card_text'));
-    }
-}
-
-/**
- * Хэндлер для обработки выбора, когда у пользователя ЕСТЬ карта (Инструкция / Выход)
- */
-async function processHasCardMenu(client, msg, chatId, lang) {
-    const text = (msg.body || '').trim().toLowerCase();
-
-    // Проверяем, запросил ли пользователь инструкцию "Как использовать карту"
-    // Сюда можно добавить проверку на цифру '1' или ключевые слова из локализации
-    if (text === '1' || text.includes('how') || text.includes('как')) {
-        await client.sendMessage(chatId, t(lang, 'how_to_use_loyalty'));
-        await showMainMenu(client, chatId, lang);
-    } else {
-        // По умолчанию при любом другом вводе (или триггере главного меню) возвращаем в корень
-        clearState(chatId);
-        await showMainMenu(client, chatId, lang);
-    }
-}
-
-/**
- * Хэндлер для обработки выбора, когда у пользователя НЕТ карты (Поиск магазина / Ввод телефона)
- */
-async function processNoCardMenu(client, msg, chatId, lang) {
-    const text = (msg.body || '').trim().toLowerCase();
-
-    // Если пользователь хочет найти магазин (например, нажал/ввел '1' или ключевое слово)
-    if (text === '1' || text.includes('store') || text.includes('магазин')) {
-        await client.sendMessage(chatId, t(lang, 'find_store_instruction'));
-        await showMainMenu(client, chatId, lang);
-        return;
-    }
-    
-    // Если пользователь хочет вернуться в меню
-    if (text === '2' || text.includes('menu') || text.includes('главное')) {
-        clearState(chatId);
-        await showMainMenu(client, chatId, lang);
-        return;
-    }
-
-    // Если это не пункт меню, значит пользователь, скорее всего, сразу отправляет свой телефон для регистрации
-    // Переводим его в стейт телефона и обрабатываем ввод текущего сообщения
+    // Сразу переводим в стейт ввода телефона и просим ввести номер
     setState(chatId, States.LOYALTY_PHONE);
-    await processPhone(client, msg, chatId, lang);
+    await client.sendMessage(chatId, t(lang, 'loyalty_start'));
 }
 
 // ── Шаг 1: телефон ─────────────────────────────────────────────────────────
@@ -232,8 +169,6 @@ async function _finalize(client, chatId, lang) {
 
     if (apiMessage) {
         await track(chatId, 'loyalty_completed', lang);
-        // Изменено: Переводим в стейт LOYALTY_HAS_CARD, чтобы пользователь мог запросить инструкцию
-        setState(chatId, States.LOYALTY_HAS_CARD);
         await client.sendMessage(chatId, apiMessage);
     }
     if (barcode) {
@@ -241,18 +176,14 @@ async function _finalize(client, chatId, lang) {
     }
     if (!apiMessage && !barcode) {
         await client.sendMessage(chatId, t(lang, 'loyalty_crm_error'));
-        await showMainMenu(client, chatId, lang);
-        return;
     }
 
-    // Если регистрация завершена успешно, мы не вызываем дефолтный showMainMenu сразу, 
-    // так как пользователь находится в стейте LOYALTY_HAS_CARD и видит информацию о карте.
+    // После успешного завершения или ошибки без кастомного сообщения возвращаем в главное меню
+    await showMainMenu(client, chatId, lang);
 }
 
 module.exports = { 
     startLoyalty, 
-    processHasCardMenu,  // ← Новое: экспорт обработчика меню существующей карты
-    processNoCardMenu,   // ← Новое: экспорт обработчика стартового меню лояльности
     processPhone, 
     processOtp, 
     processName, 

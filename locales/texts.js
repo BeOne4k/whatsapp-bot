@@ -91,12 +91,11 @@ const TEXTS = {
 
         about_text:
             'ℹ️ *About Us*\n\n' +
-            'We are a leading retail company providing quality products.\n\n' +
-            '🌐 Our stores are located across multiple countries.\n' +
-            '📞 Support: available 24/7 via this bot.\n\n' +
-            'Use the menu below to explore more:',
+            'WeedeN is the largest network of cannabis shops in Thailand 🌿\n\n' +
+            '56+ stores in key locations: Bangkok, Phuket, Samui, Pattaya, and other cities. We are building a modern and healthy cannabis culture — quality products, friendly service, and a loyalty program with real discounts up to 30%.\n' +
+            '🔗 Website: weeden.club\n\n',
 
-        socials_text: '📲 *Our Social Media*\n\nVisit our mini-landing page for all links:',
+        "socials_text": "📲 Our instagram page: https://www.instagram.com/weedenthailand/",
         btn_open_socials: '🔗 Open social links',
 
         error_generic: '⚠️ Something went wrong. Please try again.',
@@ -200,12 +199,11 @@ const TEXTS = {
 
         about_text:
             'ℹ️ *О компании*\n\n' +
-            'Мы — ведущая розничная компания, предлагающая качественные продукты.\n\n' +
-            '🌐 Наши магазины расположены в нескольких странах.\n' +
-            '📞 Поддержка доступна 24/7 через этого бота.\n\n' +
-            'Используйте меню для навигации:',
+            'WeedeN — крупнейшая сеть cannabis-шопов в Таиланде 🌿\n\n' +
+            '56+ магазинов в ключевых локациях: Бангкок, Пхукет, Самуи, Паттайя и другие города. Мы строим современную и здоровую cannabis-культуру — качественные продукты, дружелюбный сервис и программа лояльности с реальными скидками до 30%.\n' +
+            '🔗 Сайт: weeden.club\n\n',
 
-        socials_text: '📲 *Наши соцсети*\n\nПосетите наш мини-лендинг со всеми ссылками:',
+        "socials_text": "📲 Наш инстаграм: https://www.instagram.com/weedenthailand/",
         btn_open_socials: '🔗 Открыть соцсети',
 
         error_generic: '⚠️ Что-то пошло не так. Попробуйте ещё раз.',
@@ -304,12 +302,11 @@ const TEXTS = {
 
         about_text:
             'ℹ️ *เกี่ยวกับเรา*\n\n' +
-            'เราเป็นบริษัทค้าปลีกชั้นนำที่มอบสินค้าคุณภาพ\n\n' +
-            '🌐 ร้านค้าของเราอยู่ในหลายประเทศ\n' +
-            '📞 บริการตลอด 24/7 ผ่านบอตนี้\n\n' +
-            'ใช้เมนูเพื่อสำรวจเพิ่มเติม:',
+            'WeedeN คือเครือข่ายร้านกัญชาที่ใหญ่ที่สุดในประเทศไทย 🌿\n\n' +
+            'มีมากกว่า 56 สาขาในพื้นที่สำคัญ: กรุงเทพฯ, ภูเก็ต, เกาะสมุย, พัทยา และเมืองอื่นๆ เรากำลังสร้างวัฒนธรรมกัญชาที่ทันสมัยและดีต่อสุขภาพ — สินค้าคุณภาพ บริการเป็นกันเอง และโปรแกรมสะสมแต้มที่ให้ส่วนลดสูงสุดถึง 30%\n' +
+            '🔗 เว็บไซต์: weeden.club\n\n',
 
-        socials_text: '📲 *โซเชียลมีเดียของเรา*\n\nเยี่ยมชมหน้า mini-landing ของเรา:',
+        "socials_text": "📲 อินสตาแกรมของเรา: https://www.instagram.com/weedenthailand\_th/",
         btn_open_socials: '🔗 เปิดโซเชียลมีเดีย',
 
         error_generic: '⚠️ เกิดข้อผิดพลาด กรุณาลองอีกครั้ง',

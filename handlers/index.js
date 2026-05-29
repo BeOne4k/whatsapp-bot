@@ -134,7 +134,7 @@ function setupHandlers(client) {
                     await startHandler.showMainMenu(client, chatId, lang);
                     return;
                 }
-                if (text === 'm' || text === 'м' || /manager|менеджер|ผู้จัดการ/i.test(text)) {
+                if (text.toLowerCase() === 'm' || text.toLowerCase() === 'м' || /manager|менеджер|ผู้จัดการ/i.test(text)) {
                     await helpHandler.contactManager(client, chatId, lang);
                     return;
                 }

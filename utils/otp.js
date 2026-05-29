@@ -1,9 +1,9 @@
 /**
  * utils/otp.js — OTP generation and verification.
  * Mirrors utils/otp.py exactly.
- * Twilio credentials are read from config.js (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM).
  */
 
+const config = require('../config');
 const log = (...args) => console.log('[OTP]', ...args);
 
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -11,6 +11,12 @@ const MAX_ATTEMPTS = 3;
 
 // In-memory store: phone -> { otp, ts, attempts }
 const otpStore = new Map();
+
+// Инициализируем клиент Twilio один раз на уровне модуля, если конфиги заданы
+let twilioClient = null;
+if (config.TWILIO_ACCOUNT_SID && config.TWILIO_AUTH_TOKEN) {
+    twilioClient = require('twilio')(config.TWILIO_ACCOUNT_SID, config.TWILIO_AUTH_TOKEN);
+}
 
 function generateOtp(phone) {
     const otp = String(Math.floor(100000 + Math.random() * 900000));
@@ -53,29 +59,32 @@ function verifyOtp(phone, entered) {
 }
 
 /**
- * Send OTP via SMS using Twilio.
- * Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM in .env.
- * If not configured, falls back to a stub (logs to console only).
+ * Send OTP via SMS using Twilio Messaging Service.
+ * Mirrors send_otp_sms from otp.py.
  */
 async function sendOtpSms(phone, otp) {
-    const config = require('../config');
-
-    if (!config.TWILIO_ACCOUNT_SID || !config.TWILIO_AUTH_TOKEN || !config.TWILIO_FROM) {
-        log(`[stub] OTP ${otp} → ${phone} (Twilio not configured, set TWILIO_* in .env)`);
+    // Проверяем наличие клиента и SID сервиса сообщений
+    if (!twilioClient || !config.TWILIO_MESSAGING_SERVICE_SID) {
+        log(`[stub] OTP ${otp} → ${phone} (Twilio or Messaging Service not configured)`);
         return true;
     }
 
     try {
-        const twilio = require('twilio')(config.TWILIO_ACCOUNT_SID, config.TWILIO_AUTH_TOKEN);
-        await twilio.messages.create({
+        // Короткий текст сообщения без жестких триггеров для спам-фильтров
+        const messageBody = `Code: ${otp}. Expire in ${OTP_TTL_MS / 60 / 1000} min.`;
+        
+        // Создаем СМС через Messaging Service
+        const message = await twilioClient.messages.create({
             to: phone,
-            from: config.TWILIO_FROM,
-            body: `Your verification code: ${otp}`,
+            messagingServiceSid: config.TWILIO_MESSAGING_SERVICE_SID,
+            body: messageBody,
         });
-        log(`Sent OTP to ${phone} via Twilio`);
+        
+        // Записываем в логи SID сообщения для отслеживания статуса в консоли Twilio
+        console.log(`[SMS] OTP request sent to ${phone}. Message SID: ${message.sid}`);
         return true;
     } catch (e) {
-        log(`Twilio error for ${phone}:`, e.message);
+        console.error(`[SMS] Failed to send OTP to ${phone}:`, e.message);
         return false;
     }
 }

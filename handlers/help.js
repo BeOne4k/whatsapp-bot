@@ -69,9 +69,7 @@ async function contactManager(client, chatId, lang) {
  */
 function _formatAiReply(aiText, lang) {
     const waId = config.MANAGER_WA_ID;
-    const managerHint = waId
-        ? `\n\n👤 ${t(lang, 'btn_transfer_manager')}: *${waId}*\n_(${t(lang, 'help_hint')})_`
-        : `\n\n_(${t(lang, 'help_hint')})_`;
+    const managerHint = `\n\n_(${t(lang, 'help_hint')})_`;
     return aiText + managerHint;
 }
 
