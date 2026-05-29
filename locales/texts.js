@@ -19,6 +19,7 @@ TEXTS = {
         "help_cleared": "✅ Conversation cleared. Let's start fresh!",
         "btn_back": "⬅️ Back",
         "btn_main_menu": "🏠 Main menu",
+        "menu_hint": "Reply with a number to choose:\n\n1️⃣ 📍 Find the nearest store\n2️⃣ 🎁 Get a loyalty card\n3️⃣ 🤖 Help (AI Assistant)\n4️⃣ 💬 Contact a manager\n5️⃣ ℹ️ About the company\n6️⃣ 📲 Our social media\n7️⃣ 🌐 Change language",
         "btn_change_lang": "🌐 Change language",
 
         "loading": "⏳ Processing...",
@@ -157,6 +158,7 @@ TEXTS = {
         "help_cleared": "✅ История очищена. Начнём заново!",
         "btn_back": "⬅️ Назад",
         "btn_main_menu": "🏠 Главное меню",
+        "menu_hint": "Ответьте цифрой для выбора:\n\n1️⃣ 📍 Найти ближайший магазин\n2️⃣ 🎁 Получить карту лояльности\n3️⃣ 🤖 Помощь (ИИ-ассистент)\n4️⃣ 💬 Связаться с менеджером\n5️⃣ ℹ️ О компании\n6️⃣ 📲 Наши соцсети\n7️⃣ 🌐 Сменить язык",
         "btn_change_lang": "🌐 Сменить язык",
         "loading": "⏳ Загрузка...",
 
@@ -293,6 +295,7 @@ TEXTS = {
         "help_cleared": "✅ ล้างการสนทนาแล้ว เริ่มใหม่กันเลย!",
         "btn_back": "⬅️ กลับ",
         "btn_main_menu": "🏠 เมนูหลัก",
+        "menu_hint": "ตอบด้วยตัวเลขเพื่อเลือก:\n\n1️⃣ 📍 ค้นหาร้านค้าที่ใกล้ที่สุด\n2️⃣ 🎁 รับบัตรสมาชิก\n3️⃣ 🤖 ความช่วยเหลือ (ผู้ช่วย AI)\n4️⃣ 💬 ติดต่อผู้จัดการ\n5️⃣ ℹ️ เกี่ยวกับบริษัท\n6️⃣ 📲 โซเชียลมีเดียของเรา\n7️⃣ 🌐 เปลี่ยนภาษา",
         "btn_change_lang": "🌐 เปลี่ยนภาษา",
         "loading": "⏳ กำลังโหลด",
 
