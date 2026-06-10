@@ -34,7 +34,6 @@ client.on('authenticated', () => log('info', 'Authenticated'));
 
 client.on('ready', () => {
     log('info', 'Bot is ready!');
-    setupHandlers(client);
 
     // Debug: dump all events the client emits
     const emit = client.pupPage?.on?.bind(client.pupPage);
@@ -63,6 +62,7 @@ client.on('message_create', (msg) => {
 async function main() {
     log('info', 'Starting...');
     startWebhookServer(client);
+    setupHandlers(client);
     await client.initialize();
 }
 

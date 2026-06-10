@@ -32,7 +32,11 @@ async function resolveChatId(msg) {
     return (msg.from || '').replace(/:\d+@/, '@');
 }
 
+let _registered = false;
 function setupHandlers(client) {
+
+    if(_registered) return;
+    _registered = true;
 
     client.on('message_create', async (msg) => {
         if (msg.fromMe) return;
