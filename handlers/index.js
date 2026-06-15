@@ -80,12 +80,11 @@ function setupHandlers(client) {
             }
 
             // ── Loyalty FSM ───────────────────────────────────────────────────
-            // ВРЕМЕННО ОТКЛЮЧЕНО: шаг телефона
-            // if (state === States.LOYALTY_PHONE) {
-            //     await loyaltyHandler.processPhone(client, msg, chatId, lang);
-            //     return;
-            // }
-            // ВРЕМЕННО ОТКЛЮЧЕНО: шаг OTP
+            if (state === States.LOYALTY_PHONE) {
+                await loyaltyHandler.processPhone(client, msg, chatId, lang);
+                return;
+            }
+            // OTP временно отключён
             // if (state === States.LOYALTY_OTP) {
             //     await loyaltyHandler.processOtp(client, msg, chatId, lang);
             //     return;
