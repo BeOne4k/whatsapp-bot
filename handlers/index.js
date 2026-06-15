@@ -80,14 +80,16 @@ function setupHandlers(client) {
             }
 
             // ── Loyalty FSM ───────────────────────────────────────────────────
-            if (state === States.LOYALTY_PHONE) {
-                await loyaltyHandler.processPhone(client, msg, chatId, lang);
-                return;
-            }
-            if (state === States.LOYALTY_OTP) {
-                await loyaltyHandler.processOtp(client, msg, chatId, lang);
-                return;
-            }
+            // ВРЕМЕННО ОТКЛЮЧЕНО: шаг телефона
+            // if (state === States.LOYALTY_PHONE) {
+            //     await loyaltyHandler.processPhone(client, msg, chatId, lang);
+            //     return;
+            // }
+            // ВРЕМЕННО ОТКЛЮЧЕНО: шаг OTP
+            // if (state === States.LOYALTY_OTP) {
+            //     await loyaltyHandler.processOtp(client, msg, chatId, lang);
+            //     return;
+            // }
             if (state === States.LOYALTY_NAME) {
                 await loyaltyHandler.processName(client, msg, chatId, lang);
                 return;

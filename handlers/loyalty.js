@@ -30,50 +30,52 @@ async function startLoyalty(client, msg, chatId, lang) {
     await track(chatId, 'loyalty_started', lang);
     cancelReminder(chatId, 'loyalty5m');
 
-    // Сразу переводим в стейт ввода телефона и просим ввести номер
-    setState(chatId, States.LOYALTY_PHONE);
-    await client.sendMessage(chatId, t(lang, 'loyalty_start'));
-}
-
-// ── Шаг 1: телефон ─────────────────────────────────────────────────────────
-
-async function processPhone(client, msg, chatId, lang) {
-    let phone = (msg.body || '').trim().replace(/[\s-]/g, '');
-    if (!PHONE_REGEX.test(phone)) {
-        await client.sendMessage(chatId, t(lang, 'loyalty_phone_invalid'));
-        return;
-    }
-    if (!phone.startsWith('+')) phone = '+' + phone;
-
-    updateData(chatId, { phone });
-    const otp = generateOtp(phone);
-    await sendOtpSms(phone, otp);
-
-    setState(chatId, States.LOYALTY_OTP);
-    await client.sendMessage(chatId, t(lang, 'loyalty_otp_sent', { phone }));
-    startReminder(client, chatId, lang, 'after_phone_reminder', 300, 'after_phone_reminder');
-}
-
-// ── Шаг 2: OTP ─────────────────────────────────────────────────────────────
-
-async function processOtp(client, msg, chatId, lang) {
-    const data = getData(chatId);
-    const phone = data.phone || '';
-    const { success, reason } = verifyOtp(phone, (msg.body || '').trim());
-
-    if (!success) {
-        if (reason === 'too_many') {
-            clearState(chatId);
-            await client.sendMessage(chatId, t(lang, 'loyalty_otp_attempts'));
-        } else {
-            await client.sendMessage(chatId, t(lang, 'loyalty_otp_invalid'));
-        }
-        return;
-    }
-
+    // TODO: Шаг с номером телефона временно пропущен
+    // setState(chatId, States.LOYALTY_PHONE);
+    // await client.sendMessage(chatId, t(lang, 'loyalty_start'));
     setState(chatId, States.LOYALTY_NAME);
     await client.sendMessage(chatId, t(lang, 'loyalty_ask_name'));
 }
+
+// ── ВРЕМЕННО ОТКЛЮЧЕНО: Шаг 1 — телефон ────────────────────────────────────
+//
+// async function processPhone(client, msg, chatId, lang) {
+//     let phone = (msg.body || '').trim().replace(/[\s-]/g, '');
+//     if (!PHONE_REGEX.test(phone)) {
+//         await client.sendMessage(chatId, t(lang, 'loyalty_phone_invalid'));
+//         return;
+//     }
+//     if (!phone.startsWith('+')) phone = '+' + phone;
+//
+//     updateData(chatId, { phone });
+//     const otp = generateOtp(phone);
+//     await sendOtpSms(phone, otp);
+//
+//     setState(chatId, States.LOYALTY_OTP);
+//     await client.sendMessage(chatId, t(lang, 'loyalty_otp_sent', { phone }));
+//     startReminder(client, chatId, lang, 'after_phone_reminder', 300, 'after_phone_reminder');
+// }
+
+// ── ВРЕМЕННО ОТКЛЮЧЕНО: Шаг 2 — OTP ────────────────────────────────────────
+//
+// async function processOtp(client, msg, chatId, lang) {
+//     const data = getData(chatId);
+//     const phone = data.phone || '';
+//     const { success, reason } = verifyOtp(phone, (msg.body || '').trim());
+//
+//     if (!success) {
+//         if (reason === 'too_many') {
+//             clearState(chatId);
+//             await client.sendMessage(chatId, t(lang, 'loyalty_otp_attempts'));
+//         } else {
+//             await client.sendMessage(chatId, t(lang, 'loyalty_otp_invalid'));
+//         }
+//         return;
+//     }
+//
+//     setState(chatId, States.LOYALTY_NAME);
+//     await client.sendMessage(chatId, t(lang, 'loyalty_ask_name'));
+// }
 
 // ── Шаг 3: имя ─────────────────────────────────────────────────────────────
 
@@ -134,7 +136,7 @@ async function _finalize(client, chatId, lang) {
     const data = getData(chatId);
     clearState(chatId);
 
-    const { phone, name, country, tourist = false, thai_citizen: thaiCitizen = false } = data;
+    const { phone = '', name, country, tourist = false, thai_citizen: thaiCitizen = false } = data; // TODO: phone временно пропущен
 
     await client.sendMessage(chatId, t(lang, 'loading'));
 
@@ -184,8 +186,8 @@ async function _finalize(client, chatId, lang) {
 
 module.exports = { 
     startLoyalty, 
-    processPhone, 
-    processOtp, 
+    // processPhone,  // ВРЕМЕННО ОТКЛЮЧЕНО
+    // processOtp,    // ВРЕМЕННО ОТКЛЮЧЕНО
     processName, 
     processCountry, 
     processTourist, 
