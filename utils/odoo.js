@@ -55,7 +55,6 @@ function _request(urlStr, method, headers, body) {
 async function registerCustomer({ name, phone, lang, tourist, thaiCitizen, country, email, botPlatform = 'whatsapp' }) {
     const ODOO_URL = config.ODOO_URL;
     const ODOO_API_TOKEN = config.ODOO_API_TOKEN;
-    const ODOO_HEADER = config.ODOO_HEADER
     if (!ODOO_URL || !ODOO_API_TOKEN) {
         log('warn', 'ODOO_URL or ODOO_API_TOKEN not set — skipping registration');
         return null;
@@ -79,7 +78,7 @@ async function registerCustomer({ name, phone, lang, tourist, thaiCitizen, count
         const res = await _request(
             `${ODOO_URL.replace(/\/$/, '')}/api/client/register`,
             'POST',
-            { Authorization: `Bearer ${ODOO_API_TOKEN}`, "X-Odoo-Database": `${ODOO_HEADER}`,},
+            { Authorization: `Bearer ${ODOO_API_TOKEN}` },
             payload
         );
         if (res.status >= 200 && res.status < 300) return res.body;
