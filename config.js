@@ -9,7 +9,6 @@ module.exports = {
     // ── WeedeN REST API ──────────────────────────────────────────
     ODOO_URL: process.env.ODOO_URL || '',               // e.g. https://your-odoo-instance.com
     ODOO_API_TOKEN: process.env.ODOO_API_TOKEN || '',   // Bearer token for /api/client/register
-    ODOO_HEADER: process.env.ODOO_HEADER || '',
     // ── Manager notifications ────────────────────────────────────
     MANAGER_PHONE: process.env.MANAGER_PHONE || '',     // WhatsApp number with country code, e.g. 66812345678
     MANAGER_WA_ID: '+' + process.env.MANAGER_PHONE || '',     // WhatsApp ID shown to users, e.g. +66812345678
