@@ -9,7 +9,7 @@ const { startReminder, cancelReminder } = require('../utils/reminders');
 const { generateOtp, verifyOtp, sendOtpSms } = require('../utils/otp');
 const { registerCustomer } = require('../utils/odoo');
 const { registerChannel } = require('../utils/apiClient');
-const { bind: registryBind } = require('../utils/chatRegistry');
+const { bind: registryBind, getPhoneByChatId } = require('../utils/chatRegistry');
 const { flushPending } = require('../webhook_api');
 const { showMainMenu } = require('./start');
 
@@ -23,14 +23,58 @@ function isYes(text) { return YES_WORDS.has(text.toLowerCase().trim()); }
 function isNo(text) { return NO_WORDS.has(text.toLowerCase().trim()); }
 
 /**
- * Точка входа во флоу лояльности — сразу запускает регистрацию
+ * Точка входа во флоу лояльности.
+ * Если пользователь уже зарегистрирован — показывает его карту.
+ * Если нет — запускает флоу регистрации.
  */
 async function startLoyalty(client, msg, chatId, lang) {
     console.log('[LOYALTY] ENTERED');
     await track(chatId, 'loyalty_started', lang);
     cancelReminder(chatId, 'loyalty5m');
 
-    // Сразу переводим в стейт ввода телефона и просим ввести номер
+    // ─── 1. Проверяем, привязан ли уже телефон к этому chatId ───────────────
+    const userPhone = getPhoneByChatId(chatId);
+
+    if (userPhone) {
+        // Пользователь уже регистрировался — получаем его карту из CRM
+        const result = await registerCustomer({
+            name: 'existing_user',
+            phone: userPhone,
+            lang,
+            tourist: false,
+            thaiCitizen: false,
+            country: 'unknown',
+            botPlatform: 'whatsapp',
+        });
+
+        let apiMessage = null;
+        let barcode = null;
+
+        if (result && result.content && Array.isArray(result.content.messages)) {
+            for (const m of result.content.messages) {
+                if (m.type === 'text') apiMessage = m.text;
+                else if (m.type === 'image') barcode = m.url;
+            }
+        }
+
+        const textToSend = apiMessage || t(lang, 'loyalty_already_have_card_text');
+        await client.sendMessage(chatId, textToSend);
+
+        if (barcode) {
+            const { MessageMedia } = require('whatsapp-web.js');
+            try {
+                const media = await MessageMedia.fromUrl(barcode, { unsafeMime: true });
+                await client.sendMessage(chatId, media);
+            } catch (e) {
+                console.error('[LOYALTY] barcode send error:', e.message);
+                await client.sendMessage(chatId, `🏷 Barcode: ${barcode}`);
+            }
+        }
+
+        return; // Не запускаем флоу регистрации
+    }
+
+    // ─── 2. Нового пользователя — запускаем регистрацию ─────────────────────
     setState(chatId, States.LOYALTY_PHONE);
     await client.sendMessage(chatId, t(lang, 'loyalty_start'));
 }

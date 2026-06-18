@@ -62,6 +62,9 @@ const TEXTS = {
             '🏷 Barcode: `{barcode}`\n\n' +
             'Your information has been updated.',
         loyalty_crm_error: '⚠️ A technical error occurred. Please try again later or contact our manager.',
+        loyalty_already_have_card_text:
+            '🎁 You already have a loyalty card!\n\n' +
+            'Show the barcode at the checkout or tell the cashier your number — both options work.',
         show_card_hint: 'Don\'t forget to show your loyalty card in store to get bonus',
 
         stores_request_geo:
@@ -170,6 +173,9 @@ const TEXTS = {
             '🏷 Штрихкод: `{barcode}`\n\n' +
             'Ваши данные обновлены.',
         loyalty_crm_error: '⚠️ Произошла техническая ошибка. Попробуйте позже или свяжитесь с менеджером.',
+        loyalty_already_have_card_text:
+            '🎁 У тебя уже есть карта лояльности!\n\n' +
+            'Покажи штрихкод на кассе или назови номер карты — оба варианта работают.',
         show_card_hint: 'Не забудьте предъявить в магазине свою карту лояльности, чтобы получить бонус',
 
         stores_request_geo:
@@ -278,6 +284,9 @@ const TEXTS = {
             '🏷 บาร์โค้ด: `{barcode}`\n\n' +
             'อัปเดตข้อมูลของคุณแล้ว',
         loyalty_crm_error: '⚠️ เกิดข้อผิดพลาด กรุณาลองใหม่ภายหลังหรือติดต่อผู้จัดการ',
+        loyalty_already_have_card_text:
+            '🎁 คุณมีบัตรสะสมแต้มอยู่แล้ว!\n\n' +
+            'แสดงบาร์โค้ดที่จุดชำระเงินหรือแจ้งหมายเลขบัตรของคุณ — ใช้ได้ทั้งสองวิธี',
         show_card_hint: 'อย่าลืมแสดงบัตรสะสมแต้มที่ร้านค้าเพื่อรับโบนัส',
 
         stores_request_geo:
