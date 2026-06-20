@@ -43,6 +43,29 @@ _loadLangs();
 // ── In-memory FSM store ───────────────────────────────────────────────────────
 const _store = new Map(); // chatId → { state: string|null, data: object }
 
+// ── Binom click ID / fbclid store ─────────────────────────────────────────────
+// Аналог _binom_clickid / _fbclid из Telegram-бота (utils/user_data.py).
+// Хранит данные диплинка `/start <clickid>-<fbclid>` до завершения регистрации
+// в loyalty (нужны для отправки лида в Meta Ads Manager и постбэка в Binom).
+const _binomClickId = new Map(); // chatId → clickid
+const _fbclid = new Map();       // chatId → fbclid
+
+function setBinomClickId(chatId, clickid) {
+    _binomClickId.set(chatId, clickid);
+}
+
+function getBinomClickId(chatId) {
+    return _binomClickId.get(chatId) || null;
+}
+
+function setFbclid(chatId, fbclid) {
+    _fbclid.set(chatId, fbclid);
+}
+
+function getFbclid(chatId) {
+    return _fbclid.get(chatId) || null;
+}
+
 function _get(chatId) {
     if (!_store.has(chatId)) {
         _store.set(chatId, { state: null, data: {} });
@@ -117,5 +140,7 @@ module.exports = {
     getState, setState, clearState,
     getData, updateData,
     getLang, setLang, hasLang,
+    setBinomClickId, getBinomClickId,
+    setFbclid, getFbclid,
     States,
 };

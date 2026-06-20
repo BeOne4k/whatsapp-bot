@@ -2,7 +2,7 @@
  * handlers/loyalty.js — Loyalty card registration flow for WhatsApp.
  */
 
-const { setState, clearState, getData, updateData, States } = require('../utils/state');
+const { setState, clearState, getData, updateData, States, getBinomClickId, getFbclid } = require('../utils/state');
 const { t } = require('../locales/texts');
 const { track } = require('../utils/analytics');
 const { startReminder, cancelReminder } = require('../utils/reminders');
@@ -13,7 +13,19 @@ const { bind: registryBind, getPhoneByChatId } = require('../utils/chatRegistry'
 const { flushPending } = require('../webhook_api');
 const { showMainMenu } = require('./start');
 
+const crypto = require('crypto');
+const https  = require('https');
+const http   = require('http');
+const { URL } = require('url');
+const config = require('../config');
+
 const PHONE_REGEX = /^\+?[1-9]\d{7,14}$/;
+
+// ── Meta Ads Manager (CAPI) + Binom postback ─────────────────────────────────
+// Аналог send_meta_ads_info / fire_binom_postback из Telegram-бота
+// (handlers/loyalty.py).
+const META_ADS_URL = `https://graph.facebook.com/v19.0/${config.META_PIXEL_ID}/events`;
+const BINOM_POSTBACK_BASE = 'https://wdn-family.com/c6ixl2k.php';
 
 // Вспомогательные сеты для ответов Да/Нет
 const YES_WORDS = new Set(['yes', 'да', 'ใช่', 'y', '1', '✅', 'yep', 'yeah', 'sure']);
@@ -215,6 +227,13 @@ async function _finalize(client, chatId, lang) {
     cancelReminder(chatId, 'after_phone_reminder');
     cancelReminder(chatId, 'loyalty24h');
 
+    // ── Lead-события: Meta Ads Manager (CAPI) + Binom postback ──────────────
+    // Идентично Telegram-боту (handlers/loyalty.py): вызываются сразу после
+    // успешной регистрации в Odoo, до отправки ответа пользователю.
+    const fbclid = getFbclid(chatId);
+    await sendMetaAdsInfo(phone, chatId, fbclid);
+    await fireBinomPostback(chatId);
+
     if (apiMessage) {
         await track(chatId, 'loyalty_completed', lang);
         await client.sendMessage(chatId, apiMessage);
@@ -228,6 +247,105 @@ async function _finalize(client, chatId, lang) {
 
     // После успешного завершения или ошибки без кастомного сообщения возвращаем в главное меню
     await showMainMenu(client, chatId, lang);
+}
+
+/**
+ * Отправить постбэк в Binom об одобренной конверсии.
+ * Аналог fire_binom_postback из Telegram-бота.
+ */
+async function fireBinomPostback(chatId) {
+    const clickid = getBinomClickId(chatId);
+    if (!clickid) return;
+
+    const url = new URL(BINOM_POSTBACK_BASE);
+    url.searchParams.set('cnv_id', clickid);
+    url.searchParams.set('cnv_status', 'approved');
+
+    try {
+        await _httpGet(url.toString());
+        console.log(`[binom] postback sent clickid=${clickid}`);
+    } catch (e) {
+        console.error('[binom] postback error:', e.message);
+    }
+}
+
+/**
+ * Send Lead event to Meta Ads Manager (CAPI).
+ * Аналог send_meta_ads_info из Telegram-бота.
+ */
+async function sendMetaAdsInfo(phone, chatId = '', fbclid = null) {
+    const userData = {
+        ph: crypto.createHash('sha256').update(phone).digest('hex'),
+        external_id: crypto.createHash('sha256').update(String(chatId)).digest('hex'),
+    };
+    if (fbclid) {
+        userData.fbc = `fb.1.${Math.floor(Date.now() / 1000)}.${fbclid}`;
+    }
+
+    const payload = {
+        data: [
+            {
+                event_name: 'Lead',
+                event_time: Math.floor(Date.now() / 1000),
+                action_source: 'system_generated',
+                user_data: userData,
+            },
+        ],
+    };
+
+    const url = new URL(META_ADS_URL);
+    url.searchParams.set('access_token', config.META_ACCESS_TOKEN);
+
+    try {
+        const res = await _httpPost(url.toString(), payload);
+        console.log('Meta Ads response:', res.body);
+    } catch (e) {
+        console.error('Failed to send Meta Ads event:', e.message);
+    }
+}
+
+// Лёгкие GET/POST-хелперы на встроенном https/http, без внешних зависимостей —
+// в духе остальных utils-клиентов проекта (apiClient.js, odoo.js).
+function _httpGet(urlStr) {
+    return new Promise((resolve, reject) => {
+        const url = new URL(urlStr);
+        const lib = url.protocol === 'https:' ? https : http;
+        const req = lib.get(url, { timeout: 5000 }, (res) => {
+            let data = '';
+            res.on('data', (c) => (data += c));
+            res.on('end', () => resolve({ status: res.statusCode, body: data }));
+        });
+        req.on('error', reject);
+        req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+    });
+}
+
+function _httpPost(urlStr, body) {
+    return new Promise((resolve, reject) => {
+        const url = new URL(urlStr);
+        const lib = url.protocol === 'https:' ? https : http;
+        const bodyStr = JSON.stringify(body);
+        const options = {
+            hostname: url.hostname,
+            port: url.port || (url.protocol === 'https:' ? 443 : 80),
+            path: url.pathname + url.search,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(bodyStr),
+            },
+            timeout: 10000,
+        };
+        const req = lib.request(options, (res) => {
+            let data = '';
+            res.on('data', (c) => (data += c));
+            res.on('end', () => resolve({ status: res.statusCode, body: data }));
+        });
+        req.on('error', reject);
+        req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+        req.write(bodyStr);
+        req.end();
+    });
 }
 
 module.exports = { 

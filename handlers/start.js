@@ -3,7 +3,7 @@
  * Mirrors handlers/start.py exactly.
  */
 
-const { clearState, setState, setLang, getLang, States } = require('../utils/state');
+const { clearState, setState, setLang, getLang, setBinomClickId, setFbclid, States } = require('../utils/state');
 const { t } = require('../locales/texts');
 const { track } = require('../utils/analytics');
 const { startReminder, cancelReminder } = require('../utils/reminders');
@@ -19,12 +19,24 @@ async function handleStart(client, msg, chatId) {
 
     await track(chatId, 'bot_started', lang);
 
-    // Deep-link: /start <phone>  →  bind chatId in BotsAPI
+    // Deep-link: /start <arg>  →  bind chatId in BotsAPI, или Binom clickid-fbclid
+    // (аналог `/start <arg>` в Telegram, см. handlers/start.py: cmd_start)
     if (parts.length > 1) {
-        const phone = parts[1].trim();
-        await registerChannel(phone, chatId);
-        registryBind(phone, chatId);
-        flushPending(phone, client);
+        const arg = parts[1].trim();
+        if (arg.startsWith('+') || /^\d+$/.test(arg)) {
+            // Телефон: начинается с + или только цифры
+            const phone = arg;
+            await registerChannel(phone, chatId);
+            registryBind(phone, chatId);
+            flushPending(phone, client);
+        } else {
+            // Binom click ID, опционально fbclid: "clickid-fbclid"
+            const dashIdx = arg.indexOf('-');
+            const clickid = dashIdx === -1 ? arg : arg.slice(0, dashIdx);
+            const fbclid  = dashIdx === -1 ? null : arg.slice(dashIdx + 1);
+            setBinomClickId(chatId, clickid);
+            if (fbclid) setFbclid(chatId, fbclid);
+        }
     }
 
     await showLanguageMenu(client, chatId);
