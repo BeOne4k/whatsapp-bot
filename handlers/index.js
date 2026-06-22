@@ -52,8 +52,8 @@ function setupHandlers(client) {
 
             console.log('[Incoming]', { chatId, state, lang, text });
 
-            // ── /start or "start" ─────────────────────────────────────────────
-            if (/^\/start/i.test(text) || text.toLowerCase() === 'start') {
+            // ── /start or "start [arg]" ───────────────────────────────────────
+            if (/^(\/start|start)(\s|$)/i.test(text)) {
                 await startHandler.handleStart(client, msg, chatId);
                 return;
             }
