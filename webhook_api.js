@@ -1,18 +1,31 @@
 /**
- * webhook_api.js — Express webhook server for Odoo CRM purchase events.
- * Mirrors webhook_api.py exactly.
+ * webhook_api.js — Express webhook server for Odoo CRM purchase events + broadcast.
  *
  * POST /odoo/purchase
  * Header: X-API-Key: <WEBHOOK_SECRET>
  * Body:   { phone, customer_name, product_name, order_id?, lang? }
+ *
+ * POST /broadcast
+ * Header: X-API-Key: <WEBHOOK_SECRET>
+ * Body:   { text, photo?, video?, lang?, delay? }
  */
 
 const express = require('express');
-const config = require('./config');
+const fs      = require('fs');
+const path    = require('path');
+const config  = require('./config');
 const { getChatId } = require('./utils/chatRegistry');
 
 const app = express();
-app.use(express.json());
+
+// Force UTF-8 for all JSON responses
+app.use((req, res, next) => {
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    next();
+});
+
+// Parse JSON body as UTF-8
+app.use(express.json({ type: '*/*' }));
 
 const THANK_YOU_DELAY = config.THANK_YOU_DELAY_SECONDS;
 const RETENTION_DELAY = config.RETENTION_DELAY_SECONDS;
@@ -21,6 +34,9 @@ const RETENTION_DELAY = config.RETENTION_DELAY_SECONDS;
 const _pending = {};
 
 let _client = null; // WhatsApp client, set after bot is ready
+
+// ── Broadcast lock ─────────────────────────────────────────────────────────────
+let _broadcastRunning = false;
 
 const MESSAGES = {
     thank_you: {
@@ -79,7 +95,105 @@ function flushPending(phone, client) {
     }
 }
 
-// ── Express routes ────────────────────────────────────────────────────────────
+// ── Broadcast helpers ──────────────────────────────────────────────────────────
+
+/**
+ * Returns a Set of chatIds that belong to the bot itself or the manager —
+ * these must never receive broadcast messages.
+ */
+function _getExcludedChatIds() {
+    const excluded = new Set();
+
+    // Bot's own WhatsApp ID
+    if (_client && _client.info && _client.info.wid) {
+        const botId = _client.info.wid._serialized;
+        if (botId) excluded.add(botId);
+        // Also exclude without suffix just in case
+        excluded.add(_client.info.wid.user + '@c.us');
+    }
+
+    // Manager phone from config
+    if (config.MANAGER_PHONE) {
+        const managerPhone = config.MANAGER_PHONE.replace(/[\s+\-]/g, '');
+        excluded.add(managerPhone + '@c.us');
+    }
+
+    return excluded;
+}
+
+/**
+ * Reads data/user_langs.json and returns { chatId: lang } for all known users,
+ * excluding the bot itself and the manager.
+ * Optionally filters by lang.
+ */
+function _loadUserLangs(langFilter) {
+    const LANG_FILE = path.join(__dirname, 'data', 'user_langs.json');
+    let langs = {};
+    try {
+        if (fs.existsSync(LANG_FILE)) {
+            langs = JSON.parse(fs.readFileSync(LANG_FILE, 'utf-8'));
+        }
+    } catch (e) {
+        console.error('[Broadcast] Failed to load user_langs.json:', e.message);
+    }
+
+    const excluded = _getExcludedChatIds();
+
+    const result = {};
+    for (const [chatId, lang] of Object.entries(langs)) {
+        // Skip bot itself and manager
+        if (excluded.has(chatId)) {
+            console.log(`[Broadcast] Skipping excluded chatId: ${chatId}`);
+            continue;
+        }
+        // Skip groups (group chatIds end with @g.us)
+        if (chatId.endsWith('@g.us')) continue;
+        // Apply lang filter if requested
+        if (langFilter && lang !== langFilter) continue;
+
+        result[chatId] = lang;
+    }
+    return result;
+}
+
+/**
+ * Converts [text](url) markdown links to plain text (WhatsApp doesn't support hyperlinks).
+ * *bold*, _italic_, `code` are already WhatsApp-native — pass through as-is.
+ */
+function _convertMarkdown(text) {
+    return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1: $2');
+}
+
+/** Sleep for ms milliseconds */
+function _sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Send a single broadcast message to one chatId.
+ * Returns true on success, false on failure.
+ */
+async function _sendBroadcastOne(chatId, text, photo, video) {
+    try {
+        const { MessageMedia } = require('whatsapp-web.js');
+
+        if (photo) {
+            const media = await MessageMedia.fromUrl(photo, { unsafeMime: true });
+            await _client.sendMessage(chatId, media, { caption: text });
+        } else if (video) {
+            const media = await MessageMedia.fromUrl(video, { unsafeMime: true });
+            await _client.sendMessage(chatId, media, { caption: text });
+        } else {
+            await _client.sendMessage(chatId, text);
+        }
+        return true;
+    } catch (e) {
+        console.warn(`[Broadcast] Failed to send to ${chatId}:`, e.message);
+        return false;
+    }
+}
+
+// ── Express routes ─────────────────────────────────────────────────────────────
 
 app.post('/odoo/purchase', (req, res) => {
     const apiKey = req.headers['x-api-key'];
@@ -106,13 +220,98 @@ app.post('/odoo/purchase', (req, res) => {
     return res.status(200).json({ status: 'scheduled', chatId, messages: ['thank_you', 'retention'] });
 });
 
+// ── POST /broadcast ────────────────────────────────────────────────────────────
+
+app.post('/broadcast', async (req, res) => {
+    // Auth
+    const apiKey = req.headers['x-api-key'];
+    if (config.WEBHOOK_SECRET && apiKey !== config.WEBHOOK_SECRET) {
+        return res.status(401).json({ error: 'Invalid or missing X-API-Key' });
+    }
+
+    // Bot readiness
+    if (!_client) {
+        return res.status(503).json({ error: 'WhatsApp client not ready' });
+    }
+
+    // Lock — prevent concurrent broadcasts
+    if (_broadcastRunning) {
+        return res.status(409).json({ error: 'Another broadcast is already running. Please wait.' });
+    }
+
+    // Parse body
+    const {
+        text,
+        photo,
+        video,
+        lang:   langFilter = null,
+        delay:  delayBetween = 0.05,
+    } = req.body;
+
+    if (!text) {
+        return res.status(400).json({ error: '"text" is required' });
+    }
+
+    // Validate lang filter
+    const VALID_LANGS = ['ru', 'en', 'thai'];
+    if (langFilter && !VALID_LANGS.includes(langFilter)) {
+        return res.status(400).json({ error: `Invalid lang. Allowed: ${VALID_LANGS.join(', ')}` });
+    }
+
+    // Delay must be > 0
+    const delayMs = Math.max(10, parseFloat(delayBetween) * 1000 || 50);
+
+    // Load recipients (already excludes bot itself, manager, groups)
+    const userLangs = _loadUserLangs(langFilter);
+    const chatIds   = Object.keys(userLangs);
+
+    if (chatIds.length === 0) {
+        return res.json({ status: 'done', sent: 0, failed: 0, total: 0 });
+    }
+
+    // Convert markdown links; WhatsApp bold/italic/code are native
+    const finalText = _convertMarkdown(text);
+
+    _broadcastRunning = true;
+    console.log(`[Broadcast] Starting: ${chatIds.length} recipients, lang=${langFilter || 'all'}, delay=${delayMs}ms`);
+
+    let sent   = 0;
+    let failed = 0;
+
+    try {
+        for (const chatId of chatIds) {
+            const ok = await _sendBroadcastOne(
+                chatId,
+                finalText,
+                photo  || null,
+                (!photo && video) ? video : null
+            );
+            if (ok) sent++;
+            else    failed++;
+            await _sleep(delayMs);
+        }
+    } finally {
+        _broadcastRunning = false;
+    }
+
+    const total = sent + failed;
+    console.log(`[Broadcast] Done. sent=${sent}, failed=${failed}, total=${total}`);
+    return res.json({ status: 'done', sent, failed, total });
+});
+
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', bot_ready: !!_client });
+    const botId = (_client && _client.info && _client.info.wid)
+        ? _client.info.wid._serialized
+        : null;
+    res.json({
+        status: 'ok',
+        bot_ready: !!_client,
+        bot_id: botId,
+        broadcast_running: _broadcastRunning,
+    });
 });
 
 // ── Meta Webhook Verification (GET) ─────────────────────────────────────────
-// Meta calls this when you click "Подтвердить и сохранить" in Developer Console.
-// WEBHOOK_SECRET must match what you typed in "Подтверждение маркера".
 app.get("/", (req, res) => {
     const mode      = req.query["hub.mode"];
     const token     = req.query["hub.verify_token"];
@@ -127,7 +326,7 @@ app.get("/", (req, res) => {
     }
 });
 
-// ── Start server ──────────────────────────────────────────────────────────────
+// ── Start server ───────────────────────────────────────────────────────────────
 
 function startWebhookServer(client) {
     _client = client;
