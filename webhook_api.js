@@ -14,10 +14,24 @@ const express = require('express');
 const fs      = require('fs');
 const path    = require('path');
 const config  = require('./config');
+const cors = require('cors');
 const { getChatId } = require('./utils/chatRegistry');
 
 const app = express();
+const origins =
+    config.ENV === "development"
+        ? [
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+        ]
+        : [
+            config.ADMIN_URL,
+        ];
 
+app.use(cors({
+    origin: origins,
+    credentials: true,
+}));
 // Force UTF-8 for all JSON responses
 app.use((req, res, next) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');

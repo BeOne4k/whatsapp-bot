@@ -6,6 +6,7 @@
 require('dotenv').config();
 
 module.exports = {
+    ENV: process.env.ENV || '',
     // ── WeedeN REST API ──────────────────────────────────────────
     ODOO_URL: process.env.ODOO_URL || '',               // e.g. https://your-odoo-instance.com
     ODOO_API_TOKEN: process.env.ODOO_API_TOKEN || '',   // Bearer token for /api/client/register
