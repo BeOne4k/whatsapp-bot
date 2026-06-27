@@ -350,4 +350,152 @@ function startWebhookServer(client) {
     });
 }
 
+
+// Broadcast list
+const router = express.Router();
+
+// Предполагается, что whatsappClient уже инициализирован и экспортирован
+// const { client: whatsappClient } = require('./whatsappClient');
+
+/**
+ * POST /broadcastlist
+ * Body: {
+ *   phones: string[],       // список номеров телефонов
+ *   text: string,           // текст сообщения
+ *   photo?: string,         // путь к файлу или URL изображения
+ *   video?: string,         // путь к файлу или URL видео
+ *   lang?: string,          // null = всем; "ru"/"en"/"thai" = фильтр
+ *   delay?: number          // задержка между сообщениями в мс (по умолчанию 50)
+ * }
+ */
+app.post('/broadcastlist', async (req, res) => {
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+  const apiKey = req.headers['x-api-key'];
+
+  // Авторизация
+  if (WEBHOOK_SECRET && apiKey !== WEBHOOK_SECRET) {
+    return res.status(401).json({ detail: 'Invalid or missing X-API-Key' });
+  }
+
+  const {
+    phones = [],
+    text = '',
+    photo = null,
+    video = null,
+    lang = null,
+    delay = 50, // в миллисекундах (аналог 0.05 секунды)
+  } = req.body;
+
+  // Валидация
+  if (!text.trim()) {
+    return res.status(400).json({ detail: 'text must not be empty' });
+  }
+
+  if (!_client || !_client.info) {
+    return res.status(503).json({ detail: 'Bot is not initialised yet' });
+  }
+
+  // Загрузка реестра и данных пользователей
+  let registry = {};
+  let userData = {};
+
+  try {
+    registry = JSON.parse(fs.readFileSync('./data/chat_registry.json', 'utf-8'));
+  } catch {
+    return res.status(500).json({ detail: 'Failed to load chat registry' });
+  }
+
+  try {
+    userData = JSON.parse(fs.readFileSync('./data/user_data.json', 'utf-8'));
+  } catch {
+    userData = {};
+  }
+
+  const getLang = (chatId) => userData[chatId]?.lang ?? null;
+
+  // Сборка списка целевых chat_id
+  let sent = 0;
+  let failed = 0;
+  const targets = [];
+
+  for (const phone of phones) { // нормализация номера
+
+    if (!registry[phone]) {
+      console.log(`Phone not in registry: ${phone}`);
+      failed++;
+      continue;
+    }
+
+    const chatId = registry[phone];
+
+    if (lang !== null && getLang(chatId) !== lang) {
+      continue;
+    }
+
+    targets.push(chatId);
+  }
+
+  // Медиа: загружаем файл если это локальный путь
+  const getMedia = (filePath) => {
+    if (!filePath) return null;
+    if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+      return { fromUrl: filePath };
+    }
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath).toString('base64');
+      const mime = filePath.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg';
+      return { fromBase64: data, mimetype: mime };
+    }
+    return null;
+  };
+
+  const photoMedia = photo ? getMedia(photo) : null;
+  const videoMedia = video ? getMedia(video) : null;
+
+  // Рассылка
+  for (const chatId of targets) {
+    try {
+      const whatsappId = chatId.endsWith('@c.us')
+        ? chatId
+        : `${chatId}@c.us`;
+
+      if (photoMedia) {
+        const { MessageMedia } = require('whatsapp-web.js');
+        const media = photoMedia.fromUrl
+          ? await MessageMedia.fromUrl(photoMedia.fromUrl)
+          : new MessageMedia(photoMedia.mimetype, photoMedia.fromBase64);
+        await _client.sendMessage(whatsappId, media, { caption: text });
+
+      } else if (videoMedia) {
+        const { MessageMedia } = require('whatsapp-web.js');
+        const media = videoMedia.fromUrl
+          ? await MessageMedia.fromUrl(videoMedia.fromUrl)
+          : new MessageMedia(videoMedia.mimetype, videoMedia.fromBase64);
+        await _client.sendMessage(whatsappId, media, { caption: text });
+
+      } else {
+        await _client.sendMessage(whatsappId, text);
+      }
+
+      sent++;
+      console.log(`broadcast: sent to chatId=${chatId}`);
+    } catch (err) {
+      failed++;
+      console.warn(`broadcast: failed chatId=${chatId} — ${err.message}`);
+    }
+
+    if (delay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  console.log('broadcast: done.');
+
+  return res.status(200).json({
+    status: 'done',
+    sent,
+    failed,
+    total: sent + failed,
+  });
+});
 module.exports = { startWebhookServer, flushPending, app };
