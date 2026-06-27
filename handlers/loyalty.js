@@ -22,8 +22,6 @@ const config = require('../config');
 const PHONE_REGEX = /^\+?[1-9]\d{7,14}$/;
 
 // ── Meta Ads Manager (CAPI) + Binom postback ─────────────────────────────────
-// Аналог send_meta_ads_info / fire_binom_postback из Telegram-бота
-// (handlers/loyalty.py).
 const META_ADS_URL = `https://graph.facebook.com/v19.0/${config.META_PIXEL_ID}/events`;
 const BINOM_POSTBACK_BASE = 'https://wdn-family.com/c6ixl2k.php';
 
@@ -69,9 +67,11 @@ async function startLoyalty(client, msg, chatId, lang) {
             }
         }
 
+        // Отправляем текст
         const textToSend = apiMessage || t(lang, 'loyalty_already_have_card_text');
         await client.sendMessage(chatId, textToSend);
 
+        // Отправляем фото карты (штрих-код)
         if (barcode) {
             const { MessageMedia } = require('whatsapp-web.js');
             try {
@@ -104,12 +104,6 @@ async function processPhone(client, msg, chatId, lang) {
     updateData(chatId, { phone });
 
     // OTP временно отключён — сразу переходим к вводу имени
-    // const otp = generateOtp(phone);
-    // await sendOtpSms(phone, otp);
-    // setState(chatId, States.LOYALTY_OTP);
-    // await client.sendMessage(chatId, t(lang, 'loyalty_otp_sent', { phone }));
-    // startReminder(client, chatId, lang, 'after_phone_reminder', 300, 'after_phone_reminder');
-
     setState(chatId, States.LOYALTY_NAME);
     await client.sendMessage(chatId, t(lang, 'loyalty_ask_name'));
 }
@@ -228,8 +222,6 @@ async function _finalize(client, chatId, lang) {
     cancelReminder(chatId, 'loyalty24h');
 
     // ── Lead-события: Meta Ads Manager (CAPI) + Binom postback ──────────────
-    // Идентично Telegram-боту (handlers/loyalty.py): вызываются сразу после
-    // успешной регистрации в Odoo, до отправки ответа пользователю.
     const fbclid = getFbclid(chatId);
     await sendMetaAdsInfo(phone, chatId, fbclid);
     await fireBinomPostback(chatId);
@@ -245,13 +237,11 @@ async function _finalize(client, chatId, lang) {
         await client.sendMessage(chatId, t(lang, 'loyalty_crm_error'));
     }
 
-    // После успешного завершения или ошибки без кастомного сообщения возвращаем в главное меню
     await showMainMenu(client, chatId, lang);
 }
 
 /**
  * Отправить постбэк в Binom об одобренной конверсии.
- * Аналог fire_binom_postback из Telegram-бота.
  */
 async function fireBinomPostback(chatId) {
     const clickid = getBinomClickId(chatId);
@@ -271,7 +261,6 @@ async function fireBinomPostback(chatId) {
 
 /**
  * Send Lead event to Meta Ads Manager (CAPI).
- * Аналог send_meta_ads_info из Telegram-бота.
  */
 async function sendMetaAdsInfo(phone, chatId = '', fbclid = null) {
     const userData = {
@@ -304,8 +293,6 @@ async function sendMetaAdsInfo(phone, chatId = '', fbclid = null) {
     }
 }
 
-// Лёгкие GET/POST-хелперы на встроенном https/http, без внешних зависимостей —
-// в духе остальных utils-клиентов проекта (apiClient.js, odoo.js).
 function _httpGet(urlStr) {
     return new Promise((resolve, reject) => {
         const url = new URL(urlStr);

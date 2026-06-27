@@ -34,7 +34,7 @@ async function handleRegionText(client, msg, chatId, lang) {
     const text = (msg.body || '').trim();
 
     // Check if user typed back / menu
-    if (/^(menu|меню|เมนู|9)$/i.test(text)) {
+    if (/^(menu|меню|เมนู|9|0)$/i.test(text)) {
         clearState(chatId);
         await showMainMenu(client, chatId, lang);
         return;

@@ -70,7 +70,8 @@ const TEXTS = {
         stores_request_geo:
             '📍 *Find nearest store*\n\n' +
             'Please share your location (send as attachment) or type a region name:\n' +
-            'Available regions: Bangkok, Phuket, Samui, Pattaya',
+            'Available regions: Bangkok, Phuket, Samui, Pattaya\n\n' +
+            'Enter *0* to return to the main menu.',
         btn_send_geo: '📍 Share location',
         btn_choose_region: '🗺 Choose region',
         stores_choose_region: 'Please type a region name:\nBangkok, Phuket, Samui, Pattaya',
@@ -181,7 +182,8 @@ const TEXTS = {
         stores_request_geo:
             '📍 *Поиск ближайшего магазина*\n\n' +
             'Поделитесь геолокацией или введите название региона:\n' +
-            'Доступные регионы: Bangkok, Phuket, Samui, Pattaya',
+            'Доступные регионы: Bangkok, Phuket, Samui, Pattaya\n\n' +
+            'Введите *0* чтобы веренуться в главное меню.',
         btn_send_geo: '📍 Отправить геолокацию',
         btn_choose_region: '🗺 Выбрать регион',
         stores_choose_region: 'Введите название региона:\nBangkok, Phuket, Samui, Pattaya',
@@ -292,7 +294,8 @@ const TEXTS = {
         stores_request_geo:
             '📍 *ค้นหาร้านใกล้เคียง*\n\n' +
             'แชร์ตำแหน่งหรือพิมพ์ชื่อภูมิภาค:\n' +
-            'ภูมิภาคที่มี: Bangkok, Phuket, Samui, Pattaya',
+            'ภูมิภาคที่มี: Bangkok, Phuket, Samui, Pattaya\n\n'+
+            'กด *0* เพื่อกลับสู่เมนูหลัก',
         btn_send_geo: '📍 แชร์ตำแหน่ง',
         btn_choose_region: '🗺 เลือกภูมิภาค',
         stores_choose_region: 'พิมพ์ชื่อภูมิภาค:\nBangkok, Phuket, Samui, Pattaya',
