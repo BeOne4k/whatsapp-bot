@@ -15,6 +15,7 @@ const fs      = require('fs');
 const path    = require('path');
 const config  = require('./config');
 const cors = require('cors');
+const axios   = require('axios');
 const { getChatId } = require('./utils/chatRegistry');
 
 const app = express();
@@ -187,16 +188,24 @@ function _sleep(ms) {
  * Send a single broadcast message to one chatId.
  * Returns true on success, false on failure.
  */
+async function _downloadAsMedia(url) {
+    const { MessageMedia } = require('whatsapp-web.js');
+    const response = await axios.get(url, { responseType: 'arraybuffer' });
+    const contentType = response.headers['content-type'] || 'application/octet-stream';
+    const mimeType = contentType.split(';')[0].trim();
+    const data = Buffer.from(response.data).toString('base64');
+    return new MessageMedia(mimeType, data);
+}
+
 async function _sendBroadcastOne(chatId, text, photo, video) {
     try {
-        const { MessageMedia } = require('whatsapp-web.js');
-
         if (photo) {
+            const { MessageMedia } = require('whatsapp-web.js');
             const media = await MessageMedia.fromUrl(photo, { unsafeMime: true });
             await _client.sendMessage(chatId, media, { caption: text });
         } else if (video) {
-            const media = await MessageMedia.fromUrl(video, { unsafeMime: true });
-            await _client.sendMessage(chatId, media, { caption: text });
+            const media = await _downloadAsMedia(video);
+            await _client.sendMessage(chatId, media, { caption: text, sendMediaAsDocument: false });
         } else {
             await _client.sendMessage(chatId, text);
         }
@@ -478,11 +487,14 @@ app.post('/broadcastlist', async (req, res) => {
         await _client.sendMessage(whatsappId, media, { caption: text });
 
       } else if (videoMedia) {
-        const { MessageMedia } = require('whatsapp-web.js');
-        const media = videoMedia.fromUrl
-          ? await MessageMedia.fromUrl(videoMedia.fromUrl, { unsafeMime: true })
-          : new MessageMedia(videoMedia.mimetype, videoMedia.fromBase64);
-        await _client.sendMessage(whatsappId, media, { caption: text });
+        let media;
+        if (videoMedia.fromUrl) {
+          media = await _downloadAsMedia(videoMedia.fromUrl);
+        } else {
+          const { MessageMedia } = require('whatsapp-web.js');
+          media = new MessageMedia(videoMedia.mimetype, videoMedia.fromBase64);
+        }
+        await _client.sendMessage(whatsappId, media, { caption: text, sendMediaAsDocument: false });
 
       } else {
         await _client.sendMessage(whatsappId, text);
