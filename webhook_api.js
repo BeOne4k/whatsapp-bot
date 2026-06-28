@@ -197,11 +197,14 @@ async function _downloadAsMedia(url) {
                 return;
             }
             const mimeType = (res.headers['content-type'] || 'video/mp4').split(';')[0].trim();
+            const extMap = { 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/x-msvideo': 'avi', 'video/webm': 'webm' };
+            const ext = extMap[mimeType] || 'mp4';
+            const filename = `video.${ext}`;
             const chunks = [];
             res.on('data', (chunk) => chunks.push(chunk));
             res.on('end', () => {
                 const data = Buffer.concat(chunks).toString('base64');
-                resolve(new MessageMedia(mimeType, data));
+                resolve(new MessageMedia(mimeType, data, filename));
             });
             res.on('error', reject);
         }).on('error', reject);
