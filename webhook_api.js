@@ -15,7 +15,6 @@ const fs      = require('fs');
 const path    = require('path');
 const config  = require('./config');
 const cors = require('cors');
-const axios   = require('axios');
 const { getChatId } = require('./utils/chatRegistry');
 
 const app = express();
@@ -190,11 +189,23 @@ function _sleep(ms) {
  */
 async function _downloadAsMedia(url) {
     const { MessageMedia } = require('whatsapp-web.js');
-    const response = await axios.get(url, { responseType: 'arraybuffer' });
-    const contentType = response.headers['content-type'] || 'application/octet-stream';
-    const mimeType = contentType.split(';')[0].trim();
-    const data = Buffer.from(response.data).toString('base64');
-    return new MessageMedia(mimeType, data);
+    const lib = url.startsWith('https') ? require('https') : require('http');
+    return new Promise((resolve, reject) => {
+        lib.get(url, (res) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                _downloadAsMedia(res.headers.location).then(resolve).catch(reject);
+                return;
+            }
+            const mimeType = (res.headers['content-type'] || 'video/mp4').split(';')[0].trim();
+            const chunks = [];
+            res.on('data', (chunk) => chunks.push(chunk));
+            res.on('end', () => {
+                const data = Buffer.concat(chunks).toString('base64');
+                resolve(new MessageMedia(mimeType, data));
+            });
+            res.on('error', reject);
+        }).on('error', reject);
+    });
 }
 
 async function _sendBroadcastOne(chatId, text, photo, video) {
