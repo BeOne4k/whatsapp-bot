@@ -503,7 +503,7 @@ app.post('/broadcastlist', async (req, res) => {
       console.log(`broadcast: sent to chatId=${chatId}`);
     } catch (err) {
       failed++;
-      console.warn(`broadcast: failed chatId=${chatId} — ${err.message}`);
+      console.warn(`broadcast: failed chatId=${chatId} — ${err.message}`, err.stack);
     }
 
     if (delay > 0) {
