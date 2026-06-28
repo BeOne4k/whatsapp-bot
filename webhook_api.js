@@ -189,26 +189,11 @@ function _sleep(ms) {
  */
 async function _downloadAsMedia(url) {
     const { MessageMedia } = require('whatsapp-web.js');
-    const lib = url.startsWith('https') ? require('https') : require('http');
-    return new Promise((resolve, reject) => {
-        lib.get(url, (res) => {
-            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                _downloadAsMedia(res.headers.location).then(resolve).catch(reject);
-                return;
-            }
-            const mimeType = (res.headers['content-type'] || 'video/mp4').split(';')[0].trim();
-            const extMap = { 'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/x-msvideo': 'avi', 'video/webm': 'webm' };
-            const ext = extMap[mimeType] || 'mp4';
-            const filename = `video.${ext}`;
-            const chunks = [];
-            res.on('data', (chunk) => chunks.push(chunk));
-            res.on('end', () => {
-                const data = Buffer.concat(chunks).toString('base64');
-                resolve(new MessageMedia(mimeType, data, filename));
-            });
-            res.on('error', reject);
-        }).on('error', reject);
-    });
+    const media = await MessageMedia.fromUrl(url, { unsafeMime: true });
+    // Явно задаём имя файла — без него WhatsApp отправляет как документ
+    media.filename = 'video.mp4';
+    media.mimetype = 'video/mp4';
+    return media;
 }
 
 async function _sendBroadcastOne(chatId, text, photo, video) {
