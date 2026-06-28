@@ -298,7 +298,7 @@ app.post('/broadcast', async (req, res) => {
                 chatId,
                 finalText,
                 photo  || null,
-                (!photo && video) ? video : null
+                video  || null
             );
             if (ok) sent++;
             else    failed++;
@@ -443,7 +443,18 @@ app.post('/broadcastlist', async (req, res) => {
     }
     if (fs.existsSync(filePath)) {
       const data = fs.readFileSync(filePath).toString('base64');
-      const mime = filePath.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg';
+      const ext = filePath.split('.').pop().toLowerCase();
+      const mimeMap = {
+        mp4: 'video/mp4',
+        mov: 'video/quicktime',
+        avi: 'video/x-msvideo',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+        gif: 'image/gif',
+        webp: 'image/webp',
+      };
+      const mime = mimeMap[ext] || 'application/octet-stream';
       return { fromBase64: data, mimetype: mime };
     }
     return null;
@@ -462,14 +473,14 @@ app.post('/broadcastlist', async (req, res) => {
       if (photoMedia) {
         const { MessageMedia } = require('whatsapp-web.js');
         const media = photoMedia.fromUrl
-          ? await MessageMedia.fromUrl(photoMedia.fromUrl)
+          ? await MessageMedia.fromUrl(photoMedia.fromUrl, { unsafeMime: true })
           : new MessageMedia(photoMedia.mimetype, photoMedia.fromBase64);
         await _client.sendMessage(whatsappId, media, { caption: text });
 
       } else if (videoMedia) {
         const { MessageMedia } = require('whatsapp-web.js');
         const media = videoMedia.fromUrl
-          ? await MessageMedia.fromUrl(videoMedia.fromUrl)
+          ? await MessageMedia.fromUrl(videoMedia.fromUrl, { unsafeMime: true })
           : new MessageMedia(videoMedia.mimetype, videoMedia.fromBase64);
         await _client.sendMessage(whatsappId, media, { caption: text });
 
