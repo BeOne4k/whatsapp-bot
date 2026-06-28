@@ -210,7 +210,7 @@ async function _sendBroadcastOne(chatId, text, photo, video) {
         }
         return true;
     } catch (e) {
-        console.warn(`[Broadcast] Failed to send to ${chatId}:`, e.message);
+        console.warn(`[Broadcast] Failed to send to ${chatId}:`, e.message, e.stack);
         return false;
     }
 }
