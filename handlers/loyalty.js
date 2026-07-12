@@ -223,7 +223,8 @@ async function _finalize(client, chatId, lang) {
 
     // ── Lead-события: Meta Ads Manager (CAPI) + Binom postback ──────────────
     const fbclid = getFbclid(chatId);
-    await sendMetaAdsInfo(phone, chatId, fbclid);
+    const clickid = getBinomClickId(chatId);
+    await sendMetaAdsInfo(phone, chatId, fbclid, { eventId: clickid, name, country });
     await fireBinomPostback(chatId);
 
     if (apiMessage) {
@@ -260,15 +261,54 @@ async function fireBinomPostback(chatId) {
 }
 
 /**
- * Send Lead event to Meta Ads Manager (CAPI).
+ * SHA-256 хэш с нормализацией (lowercase, trim), как того требует Meta.
  */
-async function sendMetaAdsInfo(phone, chatId = '', fbclid = null) {
+function _hash(value) {
+    return crypto.createHash('sha256').update(String(value).trim().toLowerCase()).digest('hex');
+}
+
+/**
+ * Meta требует телефон без '+', пробелов и дефисов перед хэшированием —
+ * только цифры вместе с кодом страны.
+ */
+function _normalizePhoneForHash(phone) {
+    return String(phone).replace(/\D/g, '');
+}
+
+/**
+ * Send Lead event to Meta Ads Manager (CAPI).
+ *
+ * Чем больше валидных параметров user_data передано и чем точнее они
+ * нормализованы перед хэшированием — тем выше Event Match Quality (EMQ)
+ * в Events Manager, и тем точнее Meta сможет находить похожую аудиторию
+ * (lookalike) под цель кампании "Лиды".
+ */
+async function sendMetaAdsInfo(phone, chatId = '', fbclid = null, extra = {}) {
+    const { eventId = null, name = null, country = null } = extra;
+
     const userData = {
-        ph: crypto.createHash('sha256').update(phone).digest('hex'),
-        external_id: crypto.createHash('sha256').update(String(chatId)).digest('hex'),
+        ph: [_hash(_normalizePhoneForHash(phone))],
+        external_id: [_hash(String(chatId))],
     };
+
+    // fbc — обязателен для связки клика по рекламе с конверсией.
+    // Формат: fb.<subdomain_index>.<creation_time>.<fbclid>
     if (fbclid) {
         userData.fbc = `fb.1.${Math.floor(Date.now() / 1000)}.${fbclid}`;
+    }
+
+    // Имя/фамилия — весомые сигналы для матчинга с профилем в Meta.
+    if (name) {
+        const parts = String(name).trim().split(/\s+/);
+        if (parts[0]) userData.fn = [_hash(parts[0])];
+        if (parts.length > 1) userData.ln = [_hash(parts.slice(1).join(' '))];
+    }
+
+    // Страна — учитывается только если это уже ISO-код (th, ru, ...).
+    // Свободный текст (Thailand/Таиланд) даст слабый матчинг по country —
+    // лучше сначала привести к ISO 3166-1 alpha-2.
+    if (country && /^[A-Za-z]{2}$/.test(String(country).trim())) {
+        userData.country = [_hash(country)];
     }
 
     const payload = {
@@ -276,18 +316,32 @@ async function sendMetaAdsInfo(phone, chatId = '', fbclid = null) {
             {
                 event_name: 'Lead',
                 event_time: Math.floor(Date.now() / 1000),
-                action_source: 'system_generated',
+                // уникальный event_id на конверсию — на случай, если позже
+                // добавите Pixel на сайт и понадобится дедупликация
+                event_id: eventId || `lead_${chatId}_${Math.floor(Date.now() / 1000)}`,
+                // "chat" точнее описывает канал (WhatsApp-бот), чем "system_generated"
+                action_source: 'chat',
                 user_data: userData,
             },
         ],
     };
+
+    // Позволяет проверять события в Events Manager -> Test Events до запуска в прод
+    if (config.META_TEST_EVENT_CODE) {
+        payload.test_event_code = config.META_TEST_EVENT_CODE;
+    }
 
     const url = new URL(META_ADS_URL);
     url.searchParams.set('access_token', config.META_ACCESS_TOKEN);
 
     try {
         const res = await _httpPost(url.toString(), payload);
-        console.log('Meta Ads response:', res.body);
+        const parsed = JSON.parse(res.body);
+        if (parsed.error) {
+            console.error('Meta CAPI error:', parsed.error);
+        } else {
+            console.log(`Meta CAPI ok: events_received=${parsed.events_received} fbtrace_id=${parsed.fbtrace_id}`);
+        }
     } catch (e) {
         console.error('Failed to send Meta Ads event:', e.message);
     }
@@ -342,5 +396,6 @@ module.exports = {
     processName, 
     processCountry, 
     processTourist, 
-    processThaiCitizen 
+    processThaiCitizen,
+    sendMetaAdsInfo, // экспортирован для ручного тестирования (см. test_meta_lead_whatsapp.js)
 };

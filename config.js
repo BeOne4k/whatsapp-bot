@@ -37,6 +37,7 @@ module.exports = {
     // ── Meta Conversions API (Ads Manager) ───────────────────────
     META_PIXEL_ID: process.env.META_PIXEL_ID || '',          // Facebook Pixel ID
     META_ACCESS_TOKEN: process.env.META_ACCESS_TOKEN || '',  // Meta CAPI access token
+    META_TEST_EVENT_CODE: process.env.META_TEST_EVENT_CODE || '', // Events Manager -> Test Events (оставить пустым в проде)
 
     // ── BotsAPI ──────────────────────────────────────────────────
     BOTS_API_URL: process.env.BOTS_API_URL || 'http://localhost:8000',
