@@ -99,6 +99,20 @@
     "photo_url": null
   },
   {
+    "id": 8,
+    "name": "PK 006 Patong OTOP",
+    "address": "Patong OTOP (13:00 - 01:00)",
+    "region": "Phuket",
+    "hours": "13:00 - 01:00",
+    "focus": "x",
+    "revenue": 1.5,
+    "lat": 7.887454912445379,
+    "lon": 98.29550650674231,
+    "google_maps_url": "https://maps.app.goo.gl/G86SAsrDCmrcijdR6",
+    "yandex_maps_url": null,
+    "photo_url": null
+  },
+  {
     "id": 9,
     "name": "PK 020 Karon Patak",
     "address": "Karon Patak (13:00 - 01:00, 3 PS)",
@@ -113,17 +127,17 @@
     "photo_url": null
   },
   {
-    "id": 11,
-    "name": "PK 024 KoKaeo RoyalMarina",
-    "address": "KoKaeo RoyalMarina (08:00 - 20:00, 1 PS)",
+    "id": 10,
+    "name": "PK 034 Karon Patak2",
+    "address": "Karon Patak2 (12:00 - 24:00)",
     "region": "Phuket",
-    "hours": "08:00 - 20:00",
-    "focus": null,
-    "revenue": null,
-    "lat": 7.967300831935918,
-    "lon": 98.39091038650743,
-    "google_maps_url": "https://maps.app.goo.gl/6u5wSte8UoUyvbPU9",
-    "yandex_maps_url": null,
+    "hours": "12:00 - 24:00",
+    "focus": "x",
+    "revenue": 0.43,
+    "lat": 7.848917979852183,
+    "lon": 98.29441271534327,
+    "google_maps_url": "https://maps.app.goo.gl/iH8wQzwhUxqbSsvf7",
+    "yandex_maps_url": "https://yandex.com/maps/org/140484553325",
     "photo_url": null
   },
   {
@@ -297,6 +311,20 @@
     "photo_url": null
   },
   {
+    "id": 56,
+    "name": "Phi Phi Beach Front",
+    "address": "Phi Phi Beach Front",
+    "region": "Phuket",
+    "hours": "",
+    "focus": null,
+    "revenue": null,
+    "lat": 7.738831153566287,
+    "lon": 98.77180137116417,
+    "google_maps_url": "https://maps.app.goo.gl/KcYRoW6xQxGg6vGd8",
+    "yandex_maps_url": null,
+    "photo_url": null
+  },
+  {
     "id": 23,
     "name": "BK 028 KhaoSan MublerryHotel",
     "address": "KhaoSan MublerryHotel (12-04)",
@@ -394,7 +422,7 @@
     "lat": 13.761799596124176,
     "lon": 100.49601295582093,
     "google_maps_url": "https://maps.app.goo.gl/YWvboGKkCn7x4vCa8",
-    "yandex_maps_url": null,
+    "yandex_maps_url": "https://yandex.com/maps/org/weeden/11038396374/?ll=100.495398%2C13.761217&z=17",
     "photo_url": null
   },
   {
@@ -464,6 +492,48 @@
     "lat": 13.737299972955384,
     "lon": 100.55996637116418,
     "google_maps_url": "https://maps.app.goo.gl/GZHgbsjyuU9XMzSdA",
+    "yandex_maps_url": null,
+    "photo_url": null
+  },
+  {
+    "id": 57,
+    "name": "Nana Sukhumvit 8",
+    "address": "Nana Sukhumvit 8",
+    "region": "Bangkok",
+    "hours": "",
+    "focus": null,
+    "revenue": null,
+    "lat": 13.740157336243529,
+    "lon": 100.5560352018507,
+    "google_maps_url": "https://maps.app.goo.gl/5AmukkKMtSLEcsVKA",
+    "yandex_maps_url": null,
+    "photo_url": null
+  },
+  {
+    "id": 58,
+    "name": "Sathorn Yenakat",
+    "address": "Sathorn Yenakat",
+    "region": "Bangkok",
+    "hours": "",
+    "focus": null,
+    "revenue": null,
+    "lat": 13.719801431616078,
+    "lon": 100.54755024232836,
+    "google_maps_url": "https://maps.app.goo.gl/iTY1pMbY8ZWhoxyC6",
+    "yandex_maps_url": null,
+    "photo_url": null
+  },
+  {
+    "id": 59,
+    "name": "Central Beach Front",
+    "address": "Central Beach Front",
+    "region": "Pattaya",
+    "hours": "",
+    "focus": null,
+    "revenue": null,
+    "lat": 12.930524638115916,
+    "lon": 100.87821277116419,
+    "google_maps_url": "https://maps.app.goo.gl/5TVAW2ZTL4DEphwt5",
     "yandex_maps_url": null,
     "photo_url": null
   },
