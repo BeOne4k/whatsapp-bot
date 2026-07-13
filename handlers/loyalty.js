@@ -9,7 +9,7 @@ const { startReminder, cancelReminder } = require('../utils/reminders');
 const { generateOtp, verifyOtp, sendOtpSms } = require('../utils/otp');
 const { registerCustomer } = require('../utils/odoo');
 const { registerChannel } = require('../utils/apiClient');
-const { bind: registryBind, getPhoneByChatId } = require('../utils/chatRegistry');
+const { bind: registryBind, getPhoneByChatId, TEMP_PREFIX } = require('../utils/chatRegistry');
 const { flushPending } = require('../webhook_api');
 const { showMainMenu } = require('./start');
 
@@ -43,7 +43,11 @@ async function startLoyalty(client, msg, chatId, lang) {
     cancelReminder(chatId, 'loyalty5m');
 
     // ─── 1. Проверяем, привязан ли уже телефон к этому chatId ───────────────
-    const userPhone = getPhoneByChatId(chatId);
+    let userPhone = getPhoneByChatId(chatId);
+    // "wa:<chatId>" — временная привязка (ensureBound), ещё не настоящий телефон
+    if (userPhone && userPhone.startsWith(TEMP_PREFIX)) {
+        userPhone = null;
+    }
 
     if (userPhone) {
         // Пользователь уже регистрировался — получаем его карту из CRM

@@ -4,6 +4,7 @@
 
 const { getState, getLang, hasLang, clearState, States } = require('../utils/state');
 const { t } = require('../locales/texts');
+const { ensureBound } = require('../utils/chatRegistry');
 
 const startHandler   = require('./start');
 const loyaltyHandler = require('./loyalty');
@@ -51,6 +52,13 @@ function setupHandlers(client) {
             const text   = (msg.body || '').trim();
 
             console.log('[Incoming]', { chatId, state, lang, text });
+
+            // Привязываем chatId при ЛЮБОМ сообщении пользователя, КРОМЕ
+            // команды /start — её намеренно игнорируем, аналогично
+            // Telegram- и LINE-ботам.
+            if (!/^(\/start|start)(\s|$)/i.test(text)) {
+                ensureBound(chatId);
+            }
 
             // ── /start or "start [arg]" ───────────────────────────────────────
             if (/^(\/start|start)(\s|$)/i.test(text)) {

@@ -14,6 +14,10 @@ let _registry = {};
 // Обратный индекс: chatId → normalized_phone (как в Python-версии)
 let _reverse = {};
 
+// Префикс временного ключа для привязки "до регистрации" (пока не известен
+// реальный номер телефона) — аналог "tg:<user_id>" в Telegram-боте.
+const TEMP_PREFIX = 'wa:';
+
 function _normalize(phone) {
     return phone.trim().replace(/[\s-]/g, '');
 }
@@ -70,6 +74,22 @@ function getPhoneByChatId(chatId) {
     return _reverse[chatId] || null;
 }
 
+/**
+ * Гарантирует, что у chatId есть хоть какая-то запись в реестре.
+ *
+ * Если реального телефона ещё нет — привязывает временный ключ
+ * "wa:<chatId>". Как только становится известен настоящий номер
+ * (см. handlers/loyalty.js: processPhone), bind() автоматически
+ * заменит временную запись на реальную (через обратный индекс).
+ *
+ * Если реальный телефон уже привязан — ничего не делает.
+ */
+function ensureBound(chatId) {
+    const existing = getPhoneByChatId(chatId);
+    if (existing && !existing.startsWith(TEMP_PREFIX)) return;
+    bind(`${TEMP_PREFIX}${chatId}`, chatId);
+}
+
 _load();
 
-module.exports = { bind, getChatId, getPhoneByChatId };
+module.exports = { bind, getChatId, getPhoneByChatId, ensureBound, TEMP_PREFIX };
