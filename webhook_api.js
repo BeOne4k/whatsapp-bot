@@ -407,11 +407,11 @@ app.post('/broadcastlist', async (req, res) => {
   let registry = {};
   let userData = {};
 
-  try {
-    registry = JSON.parse(fs.readFileSync('./data/chat_registry.json', 'utf-8'));
-  } catch {
-    return res.status(500).json({ detail: 'Failed to load chat registry' });
-  }
+//   try {
+//     registry = JSON.parse(fs.readFileSync('./data/chat_registry.json', 'utf-8'));
+//   } catch {
+//     return res.status(500).json({ detail: 'Failed to load chat registry' });
+//   }
 
   try {
     userData = JSON.parse(fs.readFileSync('./data/user_data.json', 'utf-8'));
@@ -428,13 +428,7 @@ app.post('/broadcastlist', async (req, res) => {
 
   for (const phone of phones) { // нормализация номера
 
-    if (!registry[phone]) {
-      console.log(`Phone not in registry: ${phone}`);
-      failed++;
-      continue;
-    }
-
-    const chatId = registry[phone];
+    const chatId = phone.replaceAll("+", "") + "@c.us";
 
     if (lang !== null && getLang(chatId) !== lang) {
       continue;
