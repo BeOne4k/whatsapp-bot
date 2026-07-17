@@ -42,8 +42,7 @@ function setupHandlers(client) {
         if (msg.fromMe) return;
 
         try {
-            const chat = await msg.getChat();
-            if (chat.isGroup) return;
+            if (msg.from.endsWith("@g.us")) return;
 
             const chatId = await resolveChatId(msg);
             const state  = getState(chatId);
