@@ -7,7 +7,13 @@ const TEXTS = {
     en: {
         welcome: '👋 Welcome! Please choose your language:',
         lang_set: '✅ Language set to English.',
-        main_menu: 'Hello! 👋 Welcome to WeedeN — one of the leading Thai brands in healthy lifestyle and cannabis-based wellness. We have 56+ stores all over Thailand: Bangkok, Phuket, Samui, Pattaya, and other cities.\nChoose what you are interested in 👇',
+        main_menu: `WeedeN is the largest cannabis retail network in Thailand 🌿
+
+With 57+ stores across Bangkok, Phuket, Samui, Pattaya, and other cities, we are building a healthy cannabis culture. We are more than just shops — we are a community, events, our own farm, premium-quality products, and professional budtenders.
+
+We also offer a loyalty program with discounts of up to 30%.
+
+🔗 weeden.club`,
         btn_stores: '📍 Find nearest store',
         btn_loyalty: '🎁 Get loyalty card',
         btn_manager: '💬 Contact manager',
@@ -120,12 +126,12 @@ const TEXTS = {
     ru: {
         welcome: '👋 Добро пожаловать! Пожалуйста, выберите язык:',
         lang_set: '✅ Язык установлен: Русский.',
-        main_menu: 'WeedeN — самая большая сеть cannabis-шопов в Таиланде 🌿'+
+        main_menu: `WeedeN — самая большая сеть cannabis-шопов в Таиланде 🌿
 
-'57+ магазинов в Бангкоке, Пхукете, Самуи, Паттайе и других городах. Мы строим здоровую cannabis-культуру — и это больше, чем просто магазины: комьюнити, ивенты, своя ферма, премиум-качество и профессиональные бадтендеры.'+
+        57+ магазинов в Бангкоке, Пхукете, Самуи, Паттайе и других городах. Мы строим здоровую cannabis-культуру — и это больше, чем просто магазины: комьюнити, ивенты, своя ферма, премиум-качество и профессиональные бадтендеры.
 
-'А также карта лояльности со скидками до 30%.'+
-'🔗 weeden.club',
+        А также карта лояльности со скидками до 30%.
+        🔗 weeden.club`,
         btn_stores: '📍 Найти ближайший магазин',
         btn_loyalty: '🎁 Получить карту лояльности',
         btn_manager: '💬 Связаться с менеджером',
@@ -237,7 +243,13 @@ const TEXTS = {
     th: {
         welcome: '👋 ยินดีต้อนรับ! กรุณาเลือกภาษา:',
         lang_set: '✅ ตั้งค่าภาษาเป็นภาษาไทยแล้ว',
-        main_menu: 'สวัสดี! 👋 ยินดีต้อนรับสู่ WeedeN — หนึ่งในแบรนด์ชั้นนำของไทยด้านไลฟ์สไตล์เพื่อสุขภาพและเวลเนสจากกัญชา เรามีร้านค้ากว่า 55 สาขาทั่วประเทศไทย: กรุงเทพฯ ภูเก็ต สมุย พัทยา และเมืองอื่นๆ\nเลือกสิ่งที่คุณสนใจด้านล่าง 👇',
+        main_menu: `WeedeN คือเครือข่ายร้านกัญชาที่ใหญ่ที่สุดในประเทศไทย 🌿
+
+เรามีร้านทั้งหมดมากกว่า 57 สาขา ทั้งในกรุงเทพฯ ภูเก็ต สมุย พัทยา และอีกหลายเมืองทั่วประเทศ เรากำลังสร้างวัฒนธรรมการใช้กัญชาที่ปลอดภัยและยั่งยืน เราเป็นมากกว่าแค่ร้านกัญชา เราคือคอมมูนิตี้ ที่มีทั้งกิจกรรมและอีเวนต์ เรามีฟาร์มปลูกของเราเอง มีผลิตภัณฑ์คุณภาพพรีเมียม และ Budtenders มืออาชีพ
+
+เรายังมีโปรแกรมสมาชิกที่มอบส่วนลดให้คุณสูงสุดถึง 70%
+
+🔗 weeden.club`,
         btn_stores: '📍 ค้นหาร้านใกล้เคียง',
         btn_loyalty: '🎁 รับบัตรสะสมแต้ม',
         btn_manager: '💬 ติดต่อผู้จัดการ',
