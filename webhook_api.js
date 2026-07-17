@@ -467,43 +467,70 @@ app.post('/broadcastlist', async (req, res) => {
 
   // Рассылка
   for (const chatId of targets) {
-    try {
-      const whatsappId = chatId.endsWith('@c.us')
-        ? chatId
-        : `${chatId}@c.us`;
+  try {
+    const rawNumber = chatId.replace('@c.us', '');
 
-      if (photoMedia) {
-        const { MessageMedia } = require('whatsapp-web.js');
-        const media = photoMedia.fromUrl
-          ? await MessageMedia.fromUrl(photoMedia.fromUrl, { unsafeMime: true })
-          : new MessageMedia(photoMedia.mimetype, photoMedia.fromBase64);
-        await _client.sendMessage(whatsappId, media, { caption: text });
+    const numberId = await _client.getNumberId(rawNumber);
 
-      } else if (videoMedia) {
-        let media;
-        if (videoMedia.fromUrl) {
-          media = await _downloadAsMedia(videoMedia.fromUrl);
-        } else {
-          const { MessageMedia } = require('whatsapp-web.js');
-          media = new MessageMedia(videoMedia.mimetype, videoMedia.fromBase64);
-        }
-        await _client.sendMessage(whatsappId, media, { caption: text, sendMediaAsDocument: false });
+    if (!numberId) {
+      throw new Error(`Number ${rawNumber} is not registered on WhatsApp`);
+    }
 
+    const whatsappId = numberId._serialized;
+
+    if (photoMedia) {
+      const { MessageMedia } = require('whatsapp-web.js');
+
+      const media = photoMedia.fromUrl
+        ? await MessageMedia.fromUrl(photoMedia.fromUrl, { unsafeMime: true })
+        : new MessageMedia(photoMedia.mimetype, photoMedia.fromBase64);
+
+      await _client.sendMessage(
+        whatsappId,
+        media,
+        { caption: text }
+      );
+
+    } else if (videoMedia) {
+      let media;
+
+      if (videoMedia.fromUrl) {
+        media = await _downloadAsMedia(videoMedia.fromUrl);
       } else {
-        await _client.sendMessage(whatsappId, text);
+        const { MessageMedia } = require('whatsapp-web.js');
+        media = new MessageMedia(videoMedia.mimetype, videoMedia.fromBase64);
       }
 
-      sent++;
-      console.log(`broadcast: sent to chatId=${chatId}`);
-    } catch (err) {
-      failed++;
-      console.warn(`broadcast: failed chatId=${chatId} — ${err.message}`, err.stack);
+      await _client.sendMessage(
+        whatsappId,
+        media,
+        {
+          caption: text,
+          sendMediaAsDocument: false
+        }
+      );
+
+    } else {
+      await _client.sendMessage(
+        whatsappId,
+        text
+      );
     }
 
-    if (delay > 0) {
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
+    sent++;
+    console.log(`broadcast: sent to ${whatsappId}`);
+
+  } catch (err) {
+    failed++;
+    console.warn(
+      `broadcast: failed chatId=${chatId} — ${err.message}`
+    );
   }
+
+  if (delay > 0) {
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+}
 
   console.log('broadcast: done.');
 
